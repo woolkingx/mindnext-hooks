@@ -8,7 +8,7 @@ import json
 import re
 import time
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Tuple, Optional
 from .base_checker import BaseQualityChecker, QualityIssue, CheckResult
 
 class JavaScriptQualityChecker(BaseQualityChecker):

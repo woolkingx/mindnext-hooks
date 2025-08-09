@@ -1,0 +1,40 @@
+[config]
+enable = true
+
+[[mappings]]
+event = "UserPromptSubmit"
+rule = "keyword"
+condition = ["查詢", "搜索", "找"]
+enable = true
+action_flow = [
+    "action.notification/type=console&message=🔍 查詢提醒: 建議先用 MindNext Graph 查詢"
+]
+
+[[mappings]]
+event = "UserPromptSubmit"
+rule = "keyword"
+condition = ["記錄", "保存"]
+enable = true
+action_flow = [
+    "action.notification/type=console&message=💾 記錄提醒: 完成後請記錄到 MindNext Graph"
+]
+
+[[mappings]]
+event = "UserPromptSubmit"
+rule = "keyword"
+condition = ["測試", "test"]
+enable = true
+action_flow = [
+    "action.notification/type=console&message=🧪 測試提醒: 先做 code health check"
+]
+
+[[mappings]]
+event = "SessionStart"
+rule = "simple"
+condition = "True"
+enable = true
+action_flow = [
+    "action.cache/operation=session_init",
+    "action.cache/operation=load_context",
+    "action.notification/type=console&message=🚀 MindNext Session 初始化完成"
+]

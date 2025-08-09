@@ -1,0 +1,139 @@
+# Event → Rule → Action Flow 3D Mapping Table (TOML Format)
+# Supports comments for better readability and global usage
+
+[config]
+enable = true  # Global enable/disable switch for entire config file
+
+# Chinese keyword trigger rules  
+[[mappings]]
+event = "UserPromptSubmit"           # Event type
+rule = "keyboard"                    # Rule type: keyboard supports keyword arrays
+condition = ["記憶", "記錄", "回憶"]    # Trigger keywords (any match will trigger)
+enable = true                        # Enable switch for this rule
+action_flow = [                      # Action execution flow
+    "action.cache/operation=search&limit=5",
+    "action.buffer/operation=get&count=5&category=memory", 
+    "action.notification/type=console&message=Memory buffer ready"
+]
+return_messages = [
+    "Found 5 related memory records",
+    "Memory buffer content ready", 
+    "Ready to perform memory operations"
+]
+return_data = "memory_buffer_ready"
+return_action = "provide_context"
+
+[[mappings]]
+event = "UserPromptSubmit"
+rule = "keyboard"
+condition = ["查詢", "搜尋", "找", "搜索"]  # Query related keywords
+enable = true
+action_flow = [
+    "action.cache/operation=query",
+    "action.buffer/operation=search&count=5",
+    "action.notification/type=console&message=Query buffer ready"
+]
+return_messages = [
+    "Query executed successfully",
+    "Search buffer results available",
+    "Ready to provide query results"
+]
+return_data = "query_buffer_ready"
+return_action = "provide_results"
+
+[[mappings]]
+event = "UserPromptSubmit" 
+rule = "keyboard"
+condition = ["分析", "解析", "分解"]      # Analysis related keywords
+enable = true
+action_flow = [
+    "action.ai/operation=analyze",
+    "action.buffer/operation=get_analysis&count=5",
+    "action.notification/type=console&message=Analysis buffer ready"
+]
+return_messages = [
+    "Analysis completed successfully",
+    "Buffer analysis data prepared",
+    "Ready to provide analytical insights"
+]
+return_data = "analysis_buffer_ready"
+return_action = "provide_analysis"
+
+# PreToolUse event rules
+[[mappings]]
+event = "PreToolUse"
+rule = "simple"                      # Simple condition matching
+condition = "tool_name == 'Read'"   # Tool name matching
+enable = true
+action_flow = [
+    "action.buffer/operation=prepare_read&count=3",
+    "action.notification/type=console&message=Read preparation buffer loaded"
+]
+
+[[mappings]]
+event = "PreToolUse"
+rule = "simple"
+condition = "tool_name == 'Write'"  # Write operation preprocessing
+enable = true 
+action_flow = [
+    "action.quality/operation=pre_check",
+    "action.buffer/operation=prepare_write&count=3"
+]
+
+# PostToolUse event rules
+[[mappings]]
+event = "PostToolUse"
+rule = "simple"
+condition = "tool_name == 'Write'"  # Write operation post processing
+enable = true
+action_flow = [
+    "action.cache/operation=record",
+    "action.quality/operation=post_check", 
+    "action.notification/type=console&message=Write operation recorded"
+]
+
+# File type detection (regex)
+[[mappings]]
+event = "PostToolUse"
+rule = "regex"                      # Regex rule
+condition = "any(re.match(r'.*\\.py$', fp) for fp in file_paths)"  # Python files
+enable = true
+action_flow = [
+    "action.quality/operation=python_check",
+    "action.buffer/operation=get_python_tips&count=3"
+]
+
+# Session management
+[[mappings]]
+event = "SessionStart"
+rule = "simple"
+condition = "True"                  # Always trigger
+enable = true
+action_flow = [
+    "action.cache/operation=session_init",
+    "action.cache/operation=load_context",
+    "action.notification/type=console&message=Session initialized"
+]
+
+# Error handling
+[[mappings]]
+event = "Notification"
+rule = "simple" 
+condition = "severity == 'error'"   # Error level notifications
+enable = true
+action_flow = [
+    "action.buffer/operation=error_buffer&count=5",
+    "action.notification/type=console&message=Error buffer loaded"
+]
+
+# Session cleanup - DISABLED to prevent spam output
+[[mappings]]
+event = "Stop"
+rule = "simple"
+condition = "True"                  # Always execute cleanup
+enable = false                      # DISABLED - too much spam
+action_flow = [
+    "action.cache/operation=save_session",
+    "action.cache/operation=cleanup"
+    # Removed notification to avoid spam output
+]

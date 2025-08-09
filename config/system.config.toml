@@ -1,0 +1,49 @@
+# MindNext Hooks System Configuration
+# Global system settings for entire hooks engine
+
+[config]
+enable = true                       # Master enable switch for hooks system
+version = "1.0.0"                  # Configuration version
+debug_mode = false                 # Enable debug output
+
+[engine]
+max_concurrent_rules = 10          # Maximum concurrent rule processing
+enable_rule_chaining = true        # Allow rules to trigger other rules
+log_rule_execution = true          # Log rule execution details
+performance_monitoring = true      # Monitor performance metrics
+
+[rules]
+auto_generate_rules = true         # Auto generate rules from mappings
+default_priority = 90              # Default rule priority
+default_cooldown = 2               # Default cooldown time (seconds)
+max_actions_per_trigger = 5        # Max actions per rule trigger
+
+[actions]
+parallel_execution = true          # Execute actions in parallel when possible
+timeout_seconds = 30               # Action execution timeout
+retry_failed_actions = true        # Retry failed actions
+max_retries = 3                    # Maximum retry attempts
+
+[memory]
+enable_buffer = true               # Enable memory buffer system
+buffer_size = 100                  # Maximum buffer entries
+auto_cleanup = true                # Auto cleanup old entries
+ttl_seconds = 3600                 # Time to live for buffer entries
+
+[notifications]
+enable_console = true              # Enable console notifications
+enable_system = false              # Enable system notifications
+enable_toast = false               # Enable toast notifications
+log_notifications = true           # Log all notifications
+
+[security]
+validate_actions = true            # Validate action parameters
+sandbox_mode = false               # Run actions in sandbox
+allow_system_commands = false      # Allow system command execution
+
+[performance]
+cache_enabled = true               # Enable result caching
+cache_size = 200                   # Maximum cache entries
+metrics_collection = true          # Collect performance metrics
+profiling_enabled = false          # Enable detailed profiling
+# test comment 2

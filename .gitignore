@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Validation reports and state (these are generated)
+validation_report_*.json
+.validation_state
+
+# Translation development tools (temporary)
+apply_translations.py
+scan_chinese*.py
+chinese_*.txt
+translation_map.txt
+
+# Context buffer (runtime generated)
+.context_buffer/
+
+# Cleanup directory (legacy code archive)
+cleanup/
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+
+# Local configuration (users should copy from example)
+claude_settings_local.json
+
+# Cache
+.cache/
+
+# Records (runtime generated)
+record/

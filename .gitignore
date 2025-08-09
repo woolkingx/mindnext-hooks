@@ -44,6 +44,12 @@ logs/
 # Validation reports (these are generated)
 validation_report_*.json
 
+# Translation development tools (temporary)
+apply_translations.py
+scan_chinese*.py
+chinese_*.txt
+translation_map.txt
+
 # Context buffer (runtime generated)
 .context_buffer/
 

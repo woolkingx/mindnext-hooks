@@ -1,0 +1,108 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/mindnext_hooks.py UserPromptSubmit"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/mindnext_hooks.py PreToolUse"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/mindnext_hooks.py PostToolUse"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/mindnext_hooks.py Notification"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/mindnext_hooks.py Stop"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/mindnext_hooks.py SubagentStop"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/mindnext_hooks.py PreCompact"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/mindnext_hooks.py SessionStart"
+          }
+        ]
+      }
+    ]
+  },
+  "mindnext": {
+    "description": "MindNext Hooks System v3.0 - Three-Layer Architecture",
+    "version": "3.0-three-layer",
+    "created": "2025-08-09",
+    "main_entry": "/path/to/mindnext_hooks.py",
+    "architecture": "Event → Rule → Action Flow",
+    "features": [
+      "Three-Layer Architecture - Event processing, Rule matching, Action execution",
+      "20+ Modular Actions - Quality checks, AI analysis, notifications, memory recording",
+      "Smart Rule Engine - 19 intelligent rules with complex conditions",
+      "Action Pipelines - 7 pre-configured workflows for complex operations",
+      "Core Components - Buffer/Cache/AI SDK for enhanced functionality",
+      "System Validator - Automated configuration and integrity checks",
+      "GitHub Ready - Complete documentation and setup for global distribution"
+    ]
+  }
+}

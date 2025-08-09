@@ -1,0 +1,121 @@
+{
+  "version": "1.0.0",
+  "description": "MindNext 代碼品質檢查配置",
+  "general": {
+    "auto_fix": true,
+    "cache_enabled": true,
+    "debug": false,
+    "max_execution_time": 60
+  },
+  "file_types": {
+    "python": {
+      "black_enabled": true,
+      "flake8_enabled": true,
+      "mypy_enabled": false,
+      "auto_fix": true,
+      "check_prints": true,
+      "check_todos": true,
+      "check_line_length": true,
+      "check_unused_imports": true,
+      "check_security": true,
+      "max_line_length": 120,
+      "flake8_ignore": ["E203", "W503"]
+    },
+    "javascript": {
+      "prettier_enabled": true,
+      "eslint_enabled": true,
+      "auto_fix": true,
+      "check_console": true,
+      "check_debugger": true,
+      "check_todos": true,
+      "check_naming": true,
+      "check_complexity": true,
+      "check_security": true,
+      "check_performance": true,
+      "check_esmodule": true,
+      "check_library_suggestions": true,
+      "check_similar_functions": true,
+      "prefer_esmodule": true,
+      "console_severity": "info",
+      "console_allowed_paths": ["test/", "spec/", "debug/"],
+      "max_complexity": 10,
+      "similarity_threshold": 0.7,
+      "project_similarity_threshold": 0.8,
+      "check_project_wide_similarity": true,
+      "max_similarity_check_files": 20
+    },
+    "typescript": {
+      "extends": "javascript",
+      "tsc_enabled": true,
+      "check_any_type": true,
+      "check_non_null_assertion": true,
+      "check_interface_naming": true,
+      "check_imports": true,
+      "check_type_annotations": true,
+      "any_type_severity": "warning",
+      "console_severity": "warning"
+    },
+    "rust": {
+      "rustfmt_enabled": true,
+      "clippy_enabled": true,
+      "cargo_check_enabled": true,
+      "auto_fix": true,
+      "check_unwrap": true,
+      "check_expect": true,
+      "check_println": true,
+      "check_todos": true,
+      "check_naming": true,
+      "check_performance": true,
+      "check_security": true,
+      "unwrap_severity": "warning",
+      "println_severity": "info"
+    },
+    "golang": {
+      "gofmt_enabled": true,
+      "go_vet_enabled": true,
+      "staticcheck_enabled": true,
+      "auto_fix": true,
+      "check_fmt_print": true,
+      "check_panic": true,
+      "check_todos": true,
+      "check_error_handling": true,
+      "check_naming": true,
+      "check_interfaces": true,
+      "check_memory": true,
+      "check_concurrency": true,
+      "fmt_print_severity": "info",
+      "panic_severity": "warning"
+    }
+  },
+  "project_overrides": {
+    "mindnext": {
+      "description": "MindNext 專案特殊配置",
+      "python": {
+        "max_line_length": 120,
+        "check_prints": false,
+        "mypy_enabled": false
+      },
+      "javascript": {
+        "console_severity": "info",
+        "check_console": false
+      }
+    }
+  },
+  "ignore_patterns": [
+    "node_modules/**",
+    ".git/**",
+    "**/*.min.js",
+    "**/*.bundle.js",
+    "**/dist/**",
+    "**/build/**",
+    "**/__pycache__/**",
+    "**/target/**",
+    "**/.cache/**",
+    "**/vendor/**"
+  ],
+  "exclude_files": [
+    "*.generated.*",
+    "*.pb.*",
+    "*.d.ts"
+  ]
+}

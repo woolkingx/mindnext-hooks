@@ -1,8 +1,9 @@
 # Event → Rule → Action Flow 3D Mapping Table (TOML Format)
-# Supports comments for better readability and global usage
+# Sample configuration for reference - DO NOT USE IN PRODUCTION
+# Use rules_config_project.toml for actual project rules
 
 [config]
-enable = true  # Global enable/disable switch for entire config file
+enable = false  # DISABLED - This is a sample configuration file
 
 # Chinese keyword trigger rules  
 [[mappings]]
@@ -59,7 +60,7 @@ return_messages = [
 return_data = "analysis_buffer_ready"
 return_action = "provide_analysis"
 
-# PreToolUse event rules
+# PreToolUse event rules - Preparation only
 [[mappings]]
 event = "PreToolUse"
 rule = "simple"                      # Simple condition matching
@@ -73,11 +74,11 @@ action_flow = [
 [[mappings]]
 event = "PreToolUse"
 rule = "simple"
-condition = "tool_name == 'Write'"  # Write operation preprocessing
-enable = true 
+condition = "tool_name == 'Write'"  # Write operation preparation
+enable = true                       # Just preparation, no quality check
 action_flow = [
-    "action.quality/operation=pre_check",
     "action.buffer/operation=prepare_write&count=3"
+    # No quality check here - should be in PostToolUse
 ]
 
 # PostToolUse event rules

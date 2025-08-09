@@ -1,5 +1,5 @@
 """
-事件層 - 負責事件的接收、解析和標準化
+Event層 - 負責Event的Receive、解析和標準化
 """
 
 from dataclasses import dataclass, field
@@ -10,7 +10,7 @@ import json
 
 @dataclass
 class HookEvent:
-    """標準化的 Hook 事件"""
+    """標準化的 Hook Event"""
     event_type: str                    # UserPromptSubmit, PreToolUse, PostToolUse, etc.
     timestamp: datetime = field(default_factory=datetime.now)
     raw_data: Dict[str, Any] = field(default_factory=dict)
@@ -22,22 +22,22 @@ class HookEvent:
     content: Optional[str] = None
     user_prompt: Optional[str] = None
     
-    # 上下文信息
+    # 上下文Information
     session_id: Optional[str] = None
     sequence_number: int = 0
     
-    # 事件元數據
+    # Event元Data
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 class EventProcessor:
-    """事件處理器 - 將原始 Hook 數據轉換為標準事件"""
+    """Event Processor - 將原始 Hook Data轉換為標準Event"""
     
     def __init__(self):
         self.event_sequence = 0
         self.session_context = {}
     
     def process_hook_event(self, event_type: str, raw_data: Dict[str, Any]) -> HookEvent:
-        """將原始 Hook 數據處理為標準事件"""
+        """將原始 Hook DataProcess為標準Event"""
         self.event_sequence += 1
         
         event = HookEvent(
@@ -46,7 +46,7 @@ class EventProcessor:
             sequence_number=self.event_sequence
         )
         
-        # 根據事件類型解析特定字段
+        # 根據Event type解析特定字段
         if event_type == "UserPromptSubmit":
             self._parse_user_prompt_event(event, raw_data)
         elif event_type in ["PreToolUse", "PostToolUse"]:
@@ -54,16 +54,16 @@ class EventProcessor:
         elif event_type == "Notification":
             self._parse_notification_event(event, raw_data)
         
-        # 更新會話上下文
+        # UpdateSession上下文
         self._update_session_context(event)
         
         return event
     
     def _parse_user_prompt_event(self, event: HookEvent, raw_data: Dict[str, Any]):
-        """解析用戶提示事件"""
+        """解析User promptEvent"""
         event.user_prompt = raw_data.get('user_prompt', '')
         
-        # 提取關鍵字和意圖
+        # Extract keywords和意圖
         event.metadata.update({
             'prompt_length': len(event.user_prompt),
             'contains_keywords': self._extract_keywords(event.user_prompt),
@@ -71,11 +71,11 @@ class EventProcessor:
         })
     
     def _parse_tool_event(self, event: HookEvent, raw_data: Dict[str, Any]):
-        """解析工具事件"""
+        """解析ToolEvent"""
         event.tool_name = raw_data.get('tool_name', '')
         event.tool_input = raw_data.get('tool_input', {})
         
-        # 提取文件路徑
+        # 提取File path
         file_paths = []
         
         # 從 tool_input 提取
@@ -87,22 +87,22 @@ class EventProcessor:
         if env_paths:
             file_paths.extend(env_paths.split())
         
-        # 過濾和標準化路徑
+        # 過濾和標準化Path
         event.file_paths = self._normalize_file_paths(file_paths)
         
-        # 分析文件類型和特徵
+        # AnalyzeFileType和特徵
         event.metadata.update({
             'file_types': self._analyze_file_types(event.file_paths),
             'is_code_modification': self._is_code_modification_event(event),
             'estimated_complexity': self._estimate_operation_complexity(event)
         })
         
-        # 讀取文件內容 (對於 PostToolUse)
+        # 讀取FileContent (對於 PostToolUse)
         if event.event_type == "PostToolUse" and event.file_paths:
             event.content = self._read_file_content(event.file_paths[0])
     
     def _parse_notification_event(self, event: HookEvent, raw_data: Dict[str, Any]):
-        """解析通知事件"""
+        """解析NotificationEvent"""
         event.metadata.update({
             'message': raw_data.get('message', ''),
             'severity': raw_data.get('severity', 'info')
@@ -112,13 +112,13 @@ class EventProcessor:
         """提取提示中的關鍵字"""
         keywords = []
         key_patterns = {
-            'query': ['查詢', '搜索', '找', 'search', 'find', 'query'],
-            'record': ['記錄', '保存', '儲存', 'record', 'save', 'store'],
+            'query': ['Query', '搜索', '找', 'search', 'find', 'query'],
+            'record': ['Record', 'Save', 'Storage', 'record', 'save', 'store'],
             'backup': ['備份', 'backup', 'copy'],
-            'test': ['測試', 'test', 'check'],
-            'refactor': ['重構', '優化', 'refactor', 'optimize'],
+            'test': ['Test', 'test', 'check'],
+            'refactor': ['重構', 'Optimize', 'refactor', 'optimize'],
             'debug': ['調試', '除錯', 'debug', 'fix'],
-            'analysis': ['分析', 'analyze', 'analysis'],
+            'analysis': ['Analyze', 'analyze', 'analysis'],
             'mindnext': ['mindnext', '8d', 'qkvl', '容器', 'container']
         }
         
@@ -130,18 +130,18 @@ class EventProcessor:
         return keywords
     
     def _estimate_intent(self, prompt: str) -> str:
-        """估計用戶意圖"""
+        """估計User意圖"""
         prompt_lower = prompt.lower()
         
-        if any(word in prompt_lower for word in ['建立', 'create', '新增', 'add', '寫']):
+        if any(word in prompt_lower for word in ['Create', 'create', '新增', 'add', '寫']):
             return 'create'
-        elif any(word in prompt_lower for word in ['修改', 'modify', '更新', 'update', '編輯', 'edit']):
+        elif any(word in prompt_lower for word in ['修改', 'modify', 'Update', 'update', '編輯', 'edit']):
             return 'modify'
-        elif any(word in prompt_lower for word in ['刪除', 'delete', '移除', 'remove']):
+        elif any(word in prompt_lower for word in ['Delete', 'delete', '移除', 'remove']):
             return 'delete'
-        elif any(word in prompt_lower for word in ['查詢', 'query', '搜索', 'search', '找', 'find']):
+        elif any(word in prompt_lower for word in ['Query', 'query', '搜索', 'search', '找', 'find']):
             return 'query'
-        elif any(word in prompt_lower for word in ['分析', 'analyze', '檢查', 'check', '驗證', 'validate']):
+        elif any(word in prompt_lower for word in ['Analyze', 'analyze', 'Check', 'check', 'Validate', 'validate']):
             return 'analyze'
         elif any(word in prompt_lower for word in ['解釋', 'explain', '說明', 'describe']):
             return 'explain'
@@ -149,7 +149,7 @@ class EventProcessor:
             return 'unknown'
     
     def _normalize_file_paths(self, file_paths: List[str]) -> List[str]:
-        """標準化和過濾文件路徑"""
+        """標準化和過濾File path"""
         normalized = []
         for path_str in file_paths:
             if not path_str:
@@ -165,7 +165,7 @@ class EventProcessor:
         return list(set(normalized))  # 去重
     
     def _analyze_file_types(self, file_paths: List[str]) -> Dict[str, int]:
-        """分析文件類型分布"""
+        """AnalyzeFileType分布"""
         type_count = {}
         
         for file_path in file_paths:
@@ -176,7 +176,7 @@ class EventProcessor:
         return type_count
     
     def _is_code_modification_event(self, event: HookEvent) -> bool:
-        """判斷是否為代碼修改事件"""
+        """判斷是否為代碼修改Event"""
         if event.tool_name not in ['Write', 'Edit', 'MultiEdit']:
             return False
         
@@ -184,11 +184,11 @@ class EventProcessor:
         return any(Path(fp).suffix.lower() in code_extensions for fp in event.file_paths)
     
     def _estimate_operation_complexity(self, event: HookEvent) -> str:
-        """估計操作複雜度"""
+        """估計Operation複雜度"""
         if not event.file_paths:
             return 'simple'
         
-        # 基於文件數量和大小估計
+        # 基於File數量和Size估計
         file_count = len(event.file_paths)
         total_size = 0
         
@@ -206,11 +206,11 @@ class EventProcessor:
             return 'complex'
     
     def _read_file_content(self, file_path: str) -> Optional[str]:
-        """安全地讀取文件內容"""
+        """安全地讀取FileContent"""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
-                # 限制內容大小，避免記憶體問題
+                # 限制ContentSize，避免Memory體問題
                 if len(content) > 100000:  # 100KB
                     return content[:100000] + "...[truncated]"
                 return content
@@ -225,8 +225,8 @@ class EventProcessor:
                 return None
     
     def _update_session_context(self, event: HookEvent):
-        """更新會話上下文"""
-        # 記錄最近的事件
+        """UpdateSession上下文"""
+        # Record最近的Event
         if 'recent_events' not in self.session_context:
             self.session_context['recent_events'] = []
         
@@ -237,10 +237,10 @@ class EventProcessor:
             'files': len(event.file_paths)
         })
         
-        # 保持最近 20 個事件
+        # 保持最近 20 個Event
         self.session_context['recent_events'] = self.session_context['recent_events'][-20:]
         
-        # 統計信息
+        # 統計Information
         if 'stats' not in self.session_context:
             self.session_context['stats'] = {}
         
@@ -253,5 +253,5 @@ class EventProcessor:
             stats['tools'] = tool_stats
     
     def get_session_context(self) -> Dict[str, Any]:
-        """獲取當前會話上下文"""
+        """獲取當前Session上下文"""
         return self.session_context.copy()

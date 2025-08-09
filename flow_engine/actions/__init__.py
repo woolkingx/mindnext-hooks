@@ -1,6 +1,6 @@
 """
-Action 模組 - 物件式命名法
-包含所有專門化的動作執行器
+Action Module - 物件式命名法
+包含所有專門化的Action Executor
 """
 
 from .action_prompt import ActionPrompt

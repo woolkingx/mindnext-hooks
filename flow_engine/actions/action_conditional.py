@@ -1,5 +1,5 @@
 """
-ActionConditional - 條件控制動作執行器
+ActionConditional - Conditional Control Action Executor
 """
 
 from typing import Dict, Any, List, Optional
@@ -9,13 +9,13 @@ from .action_base import ActionExecutor, ActionResult
 from ..event_layer import HookEvent
 
 class ActionConditional(ActionExecutor):
-    """條件控制動作執行器"""
+    """Conditional Control Action Executor"""
     
     def get_action_type(self) -> str:
         return "action.conditional"
     
     def execute(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """執行條件控制動作"""
+        """ExecuteConditional controlAction"""
         start_time = datetime.now()
         
         try:
@@ -36,7 +36,7 @@ class ActionConditional(ActionExecutor):
                     action_id="action.conditional",
                     success=False,
                     execution_time=(datetime.now() - start_time).total_seconds(),
-                    error=f"未知操作: {operation}"
+                    error=f"Unknown operation: {operation}"
                 )
             
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -67,7 +67,7 @@ class ActionConditional(ActionExecutor):
             condition_result = self._evaluate_condition(condition, event, context)
             
             if condition_result['satisfied']:
-                # 執行對應的動作
+                # Execute對應的Action
                 action_type = condition.get('then_action', 'log')
                 action_params = condition.get('action_params', {})
                 
@@ -81,7 +81,7 @@ class ActionConditional(ActionExecutor):
                 
                 results.append(action_result)
             else:
-                # 檢查是否有 else 動作
+                # Check是否有 else Action
                 if 'else_action' in condition:
                     else_action = condition['else_action']
                     else_params = condition.get('else_params', {})
@@ -109,9 +109,9 @@ class ActionConditional(ActionExecutor):
         cases = parameters.get('cases', {})
         default_action = parameters.get('default', None)
         
-        # 評估 switch 值
+        # Evaluate switch 值
         if isinstance(switch_value, str) and switch_value.startswith('event.'):
-            # 動態獲取事件屬性值
+            # 動態獲取Event屬性值
             attr_path = switch_value.split('.')[1:]
             value = event
             for attr in attr_path:
@@ -136,7 +136,7 @@ class ActionConditional(ActionExecutor):
                 }
                 break
         
-        # 如果沒有匹配的 case，使用默認動作
+        # 如果沒有匹配的 case，使用DefaultAction
         if matched_case is None and default_action:
             action_result = {
                 'case': 'default',
@@ -154,7 +154,7 @@ class ActionConditional(ActionExecutor):
         }
     
     def _loop_control_logic(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """循環控制邏輯"""
+        """Loop control邏輯"""
         loop_type = parameters.get('type', 'for')
         max_iterations = parameters.get('max_iterations', 10)
         break_condition = parameters.get('break_condition', None)
@@ -172,7 +172,7 @@ class ActionConditional(ActionExecutor):
                     'timestamp': datetime.now().isoformat()
                 }
                 
-                # 檢查中斷條件
+                # CheckInterrupted條件
                 if break_condition and self._check_break_condition(break_condition, item, event, context):
                     iteration_result['break_reason'] = break_condition
                     iterations.append(iteration_result)
@@ -186,7 +186,7 @@ class ActionConditional(ActionExecutor):
             while_condition = parameters.get('condition', 'iteration_count < 5')
             
             while iteration_count < max_iterations:
-                # 評估條件
+                # Evaluate condition
                 eval_context = {
                     'iteration_count': iteration_count,
                     'event': event,
@@ -218,15 +218,15 @@ class ActionConditional(ActionExecutor):
         }
     
     def _rate_limit_logic(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """頻率限制邏輯"""
+        """Rate limit邏輯"""
         limit = parameters.get('limit', 10)  # 每分鐘最大次數
-        window = parameters.get('window', 60)  # 時間窗口（秒）
+        window = parameters.get('window', 60)  # Time窗口（秒）
         key = parameters.get('key', f"{event.event_type}_{event.tool_name}")
         
-        # 簡化的頻率限制實現
+        # 簡化的Rate limit實現
         current_time = datetime.now()
         
-        # 從上下文獲取歷史記錄
+        # 從上下文獲取歷史Record
         rate_limit_data = context.get('rate_limit_data', {})
         
         if key not in rate_limit_data:
@@ -238,20 +238,20 @@ class ActionConditional(ActionExecutor):
         
         data = rate_limit_data[key]
         
-        # 檢查是否需要重置時間窗口
+        # Check是否需要重置Time窗口
         if current_time.timestamp() - data['window_start'] > window:
             data['count'] = 0
             data['window_start'] = current_time.timestamp()
             data['requests'] = []
         
-        # 記錄當前請求
+        # Record當前Request
         data['requests'].append(current_time.timestamp())
         data['count'] += 1
         
         # 判斷是否超出限制
         allowed = data['count'] <= limit
         
-        # 更新上下文
+        # Update上下文
         context['rate_limit_data'] = rate_limit_data
         
         return {
@@ -266,12 +266,12 @@ class ActionConditional(ActionExecutor):
         }
     
     def _circuit_breaker_logic(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """斷路器邏輯"""
+        """Circuit breaker邏輯"""
         failure_threshold = parameters.get('failure_threshold', 5)
         recovery_timeout = parameters.get('recovery_timeout', 60)
         key = parameters.get('key', f"circuit_{event.event_type}")
         
-        # 從上下文獲取斷路器狀態
+        # 從上下文獲取Circuit breakerStatus
         circuit_data = context.get('circuit_breaker_data', {})
         
         if key not in circuit_data:
@@ -285,7 +285,7 @@ class ActionConditional(ActionExecutor):
         data = circuit_data[key]
         current_time = datetime.now()
         
-        # 檢查當前操作是否成功
+        # Check當前Operation是否Success
         is_success = parameters.get('success', True)
         
         if data['state'] == 'closed':
@@ -299,7 +299,7 @@ class ActionConditional(ActionExecutor):
                     data['state'] = 'open'
         
         elif data['state'] == 'open':
-            # 檢查是否可以嘗試恢復
+            # Check是否可以嘗試恢復
             if (current_time.timestamp() - data['last_failure_time']) > recovery_timeout:
                 data['state'] = 'half_open'
                 data['success_count'] = 0
@@ -307,7 +307,7 @@ class ActionConditional(ActionExecutor):
         elif data['state'] == 'half_open':
             if is_success:
                 data['success_count'] += 1
-                if data['success_count'] >= 3:  # 連續3次成功則關閉斷路器
+                if data['success_count'] >= 3:  # 連續3次Success則關閉Circuit breaker
                     data['state'] = 'closed'
                     data['failure_count'] = 0
             else:
@@ -315,7 +315,7 @@ class ActionConditional(ActionExecutor):
                 data['failure_count'] += 1
                 data['last_failure_time'] = current_time.timestamp()
         
-        # 更新上下文
+        # Update上下文
         context['circuit_breaker_data'] = circuit_data
         
         return {
@@ -330,13 +330,13 @@ class ActionConditional(ActionExecutor):
         }
     
     def _evaluate_condition(self, condition: Dict[str, Any], event: HookEvent, context: Dict[str, Any]) -> Dict[str, bool]:
-        """評估條件"""
+        """Evaluate condition"""
         expression = condition.get('expression', 'True')
         condition_type = condition.get('type', 'simple')
         
         try:
             if condition_type == 'simple':
-                # 簡單條件評估
+                # 簡單條件Evaluate
                 eval_context = {
                     'event_type': event.event_type,
                     'tool_name': event.tool_name or '',
@@ -367,7 +367,7 @@ class ActionConditional(ActionExecutor):
             return {'satisfied': False, 'error': str(e)}
     
     def _check_break_condition(self, break_condition: str, item: Any, event: HookEvent, context: Dict[str, Any]) -> bool:
-        """檢查中斷條件"""
+        """CheckInterrupted條件"""
         try:
             eval_context = {
                 'item': item,

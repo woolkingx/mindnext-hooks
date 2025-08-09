@@ -1,5 +1,5 @@
 """
-ActionNotification - 通知動作執行器
+ActionNotification - Notification Action Executor
 """
 
 from typing import Dict, Any, List
@@ -11,13 +11,13 @@ from .action_base import ActionExecutor, ActionResult
 from ..event_layer import HookEvent
 
 class ActionNotification(ActionExecutor):
-    """通知動作執行器"""
+    """Notification Action Executor"""
     
     def get_action_type(self) -> str:
         return "action.notification"
     
     def execute(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """執行通知動作"""
+        """ExecuteNotification action"""
         start_time = datetime.now()
         
         try:
@@ -40,7 +40,7 @@ class ActionNotification(ActionExecutor):
                     action_id="action.notification",
                     success=False,
                     execution_time=(datetime.now() - start_time).total_seconds(),
-                    error=f"未知通知類型: {notification_type}"
+                    error=f"未知NotificationType: {notification_type}"
                 )
             
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -61,7 +61,7 @@ class ActionNotification(ActionExecutor):
             )
     
     def _console_notification(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """控制台通知"""
+        """Console notification"""
         message = parameters.get('message', self._generate_default_message(event))
         severity = parameters.get('severity', 'info')
         
@@ -91,7 +91,7 @@ class ActionNotification(ActionExecutor):
         }
     
     def _system_notification(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """系統通知"""
+        """System notification"""
         title = parameters.get('title', 'MindNext Hooks')
         message = parameters.get('message', self._generate_default_message(event))
         
@@ -108,8 +108,8 @@ class ActionNotification(ActionExecutor):
                     'notify-send', title, message
                 ], check=True)
             elif system == 'windows':
-                # Windows 通知需要更複雜的實現
-                print(f"系統通知: {title} - {message}")
+                # Windows Notification需要更複雜的實現
+                print(f"System notification: {title} - {message}")
             
             return {
                 'type': 'system',
@@ -129,12 +129,12 @@ class ActionNotification(ActionExecutor):
             }
     
     def _toast_notification(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """Toast 通知（前端）"""
+        """Toast Notification（前端）"""
         message = parameters.get('message', self._generate_default_message(event))
         severity = parameters.get('severity', 'info')
         duration = parameters.get('duration', 5000)
         
-        # 這可以通過 WebSocket 發送到前端
+        # 這可以通過 WebSocket Send到前端
         toast_data = {
             'type': 'toast',
             'message': message,
@@ -143,33 +143,33 @@ class ActionNotification(ActionExecutor):
             'timestamp': datetime.now().isoformat()
         }
         
-        # 實際實現時可以發送到 WebSocket 或消息隊列
+        # In actual implementation時可以Send到 WebSocket 或Message隊列
         print(f"🍞 Toast: {message} ({severity})")
         
         return toast_data
     
     def _email_notification(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """郵件通知"""
+        """Email notification"""
         to_email = parameters.get('to', 'admin@mindnext.dev')
-        subject = parameters.get('subject', f'MindNext Hooks 通知 - {event.event_type}')
+        subject = parameters.get('subject', f'MindNext Hooks Notification - {event.event_type}')
         message = parameters.get('message', self._generate_detailed_message(event))
         
-        # 模擬郵件發送
+        # Simulate emailSend
         email_data = {
             'type': 'email',
             'to': to_email,
             'subject': subject,
             'message': message,
-            'status': 'simulated',  # 實際實現時發送真實郵件
+            'status': 'simulated',  # In actual implementation時Send真實Email
             'timestamp': datetime.now().isoformat()
         }
         
-        print(f"📧 郵件通知: {subject} -> {to_email}")
+        print(f"📧 Email notification: {subject} -> {to_email}")
         
         return email_data
     
     def _webhook_notification(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """Webhook 通知"""
+        """Webhook Notification"""
         url = parameters.get('url', 'https://hooks.example.com/mindnext')
         payload = {
             'event_type': event.event_type,
@@ -184,7 +184,7 @@ class ActionNotification(ActionExecutor):
             'type': 'webhook',
             'url': url,
             'payload': payload,
-            'status': 'simulated',  # 實際實現時發送 HTTP 請求
+            'status': 'simulated',  # In actual implementation時Send HTTP Request
             'timestamp': datetime.now().isoformat()
         }
         
@@ -193,12 +193,12 @@ class ActionNotification(ActionExecutor):
         return webhook_data
     
     def _slack_notification(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """Slack 通知"""
+        """Slack Notification"""
         channel = parameters.get('channel', '#mindnext-hooks')
         username = parameters.get('username', 'MindNext Bot')
         message = parameters.get('message', self._generate_default_message(event))
         
-        # Slack 消息格式
+        # Slack MessageFormat
         slack_payload = {
             'channel': channel,
             'username': username,
@@ -208,17 +208,17 @@ class ActionNotification(ActionExecutor):
                     'color': self._get_severity_color(parameters.get('severity', 'info')),
                     'fields': [
                         {
-                            'title': '事件類型',
+                            'title': 'Event type',
                             'value': event.event_type,
                             'short': True
                         },
                         {
-                            'title': '工具',
+                            'title': 'Tool',
                             'value': event.tool_name or 'N/A',
                             'short': True
                         },
                         {
-                            'title': '時間',
+                            'title': 'Time',
                             'value': event.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                             'short': False
                         }
@@ -231,7 +231,7 @@ class ActionNotification(ActionExecutor):
             'type': 'slack',
             'channel': channel,
             'payload': slack_payload,
-            'status': 'simulated',  # 實際實現時發送到 Slack API
+            'status': 'simulated',  # In actual implementation時Send到 Slack API
             'timestamp': datetime.now().isoformat()
         }
         
@@ -240,35 +240,35 @@ class ActionNotification(ActionExecutor):
         return slack_data
     
     def _generate_default_message(self, event: HookEvent) -> str:
-        """生成默認消息"""
+        """GenerateDefaultMessage"""
         if event.event_type == "PostToolUse":
             file_info = f" ({len(event.file_paths)} files)" if event.file_paths else ""
             return f"Completed {event.tool_name} operation{file_info}"
         elif event.event_type == "UserPromptSubmit":
-            return f"收到用戶提示: {event.user_prompt[:50]}..." if event.user_prompt else "收到用戶提示"
+            return f"收到User prompt: {event.user_prompt[:50]}..." if event.user_prompt else "收到User prompt"
         elif event.event_type == "PreToolUse":
-            return f"準備執行 {event.tool_name}"
+            return f"Prepare to execute {event.tool_name}"
         else:
-            return f"Hook 事件: {event.event_type}"
+            return f"Hook Event: {event.event_type}"
     
     def _generate_detailed_message(self, event: HookEvent) -> str:
-        """生成詳細消息"""
+        """Generate詳細Message"""
         details = [
-            f"事件類型: {event.event_type}",
-            f"時間: {event.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+            f"Event type: {event.event_type}",
+            f"Time: {event.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
         ]
         
         if event.tool_name:
-            details.append(f"工具: {event.tool_name}")
+            details.append(f"Tool: {event.tool_name}")
         
         if event.file_paths:
-            details.append(f"文件: {', '.join(event.file_paths)}")
+            details.append(f"File: {', '.join(event.file_paths)}")
         
         if event.user_prompt:
-            details.append(f"用戶提示: {event.user_prompt}")
+            details.append(f"User prompt: {event.user_prompt}")
         
         if event.metadata:
-            details.append("元數據:")
+            details.append("元Data:")
             for key, value in event.metadata.items():
                 details.append(f"  {key}: {value}")
         

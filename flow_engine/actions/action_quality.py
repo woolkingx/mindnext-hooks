@@ -1,5 +1,5 @@
 """
-ActionQuality - 品質檢查動作執行器
+ActionQuality - Quality Check Action Executor
 """
 
 from typing import Dict, Any, List
@@ -10,13 +10,13 @@ from .action_base import ActionExecutor, ActionResult
 from ..event_layer import HookEvent
 
 class ActionQuality(ActionExecutor):
-    """品質檢查動作執行器"""
+    """Quality Check Action Executor"""
     
     def get_action_type(self) -> str:
         return "action.quality"
     
     def execute(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """執行品質檢查動作"""
+        """ExecuteQuality checkAction"""
         start_time = datetime.now()
         
         try:
@@ -39,7 +39,7 @@ class ActionQuality(ActionExecutor):
                     action_id="action.quality",
                     success=False,
                     execution_time=(datetime.now() - start_time).total_seconds(),
-                    error=f"未知操作: {operation}"
+                    error=f"Unknown operation: {operation}"
                 )
             
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -60,9 +60,9 @@ class ActionQuality(ActionExecutor):
             )
     
     def _perform_quality_check(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """執行品質檢查"""
+        """ExecuteQuality check"""
         try:
-            # 整合現有的品質檢查系統
+            # 整合現有的Quality checkSystem
             from ...quality_modules.quality_python import PythonQualityChecker
             from ...quality_modules.quality_javascript import JavaScriptQualityChecker
             from ...quality_modules.quality_typescript import TypeScriptQualityChecker
@@ -106,7 +106,7 @@ class ActionQuality(ActionExecutor):
                     
                     all_results.append(file_result)
                     
-                    # 更新統計
+                    # Update統計
                     summary['files_checked'] += 1
                     summary['total_issues'] += file_result['issues']
                     summary['total_errors'] += file_result['errors']
@@ -122,16 +122,16 @@ class ActionQuality(ActionExecutor):
             }
             
         except ImportError:
-            # 如果品質檢查模組不可用，使用基本檢查
+            # 如果Quality checkModule不可用，使用基本Check
             return self._basic_quality_check(event, parameters)
         except Exception as e:
             return {
-                'error': f"品質檢查失敗: {str(e)}",
+                'error': f"Quality checkFailed: {str(e)}",
                 'summary': {'total_files': len(event.file_paths), 'files_checked': 0}
             }
     
     def _basic_quality_check(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """基本品質檢查"""
+        """基本Quality check"""
         all_results = []
         
         for file_path in event.file_paths:
@@ -149,7 +149,7 @@ class ActionQuality(ActionExecutor):
             errors = 0
             warnings = 0
             
-            # 基本檢查
+            # 基本Check
             lines = content.splitlines()
             for i, line in enumerate(lines, 1):
                 if len(line) > 120:
@@ -160,7 +160,7 @@ class ActionQuality(ActionExecutor):
                     issues.append(f"第 {i} 行包含 TODO/FIXME")
                     warnings += 1
                 
-                # 檢查 Tab 字符
+                # Check Tab 字符
                 if '\t' in line:
                     issues.append(f"第 {i} 行包含 Tab 字符，建議使用空格")
                     warnings += 1
@@ -186,7 +186,7 @@ class ActionQuality(ActionExecutor):
         }
     
     def _format_code(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """格式化代碼"""
+        """Format化代碼"""
         formatter_map = {
             '.py': 'black',
             '.js': 'prettier',
@@ -205,8 +205,8 @@ class ActionQuality(ActionExecutor):
             results.append({
                 'file': file_path,
                 'formatter': formatter,
-                'status': 'simulated',  # 實際實現時執行真正的格式化
-                'message': f"將使用 {formatter} 格式化文件"
+                'status': 'simulated',  # In actual implementation時Execute真正的Format化
+                'message': f"將使用 {formatter} Format化File"
             })
         
         return {
@@ -215,7 +215,7 @@ class ActionQuality(ActionExecutor):
         }
     
     def _lint_code(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """代碼靜態檢查"""
+        """代碼Static check"""
         linter_map = {
             '.py': ['flake8', 'pylint'],
             '.js': ['eslint'],
@@ -235,7 +235,7 @@ class ActionQuality(ActionExecutor):
                 'file': file_path,
                 'linters': linters,
                 'status': 'simulated',
-                'issues_found': 0  # 實際實現時執行真正的 lint
+                'issues_found': 0  # In actual implementation時Execute真正的 lint
             })
         
         return {
@@ -254,10 +254,10 @@ class ActionQuality(ActionExecutor):
             except:
                 continue
             
-            # 基本安全檢查
+            # 基本Security scan
             content_lower = content.lower()
             
-            # 檢查硬編碼密碼
+            # Check硬編碼密碼
             if 'password' in content_lower and ('=' in content or ':' in content):
                 security_issues.append({
                     'file': file_path,
@@ -266,7 +266,7 @@ class ActionQuality(ActionExecutor):
                     'message': '可能包含硬編碼密碼'
                 })
             
-            # 檢查 API 密鑰
+            # Check API 密鑰
             if 'api_key' in content_lower or 'apikey' in content_lower:
                 security_issues.append({
                     'file': file_path,
@@ -275,7 +275,7 @@ class ActionQuality(ActionExecutor):
                     'message': '可能包含硬編碼 API 密鑰'
                 })
             
-            # 檢查 SQL 注入風險
+            # Check SQL 注入風險
             if 'select' in content_lower and 'where' in content_lower and '+' in content:
                 security_issues.append({
                     'file': file_path,
@@ -291,7 +291,7 @@ class ActionQuality(ActionExecutor):
         }
     
     def _dependency_check(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """依賴檢查"""
+        """Dependency check"""
         dependencies = {
             'package_files': [],
             'outdated_packages': [],
@@ -299,28 +299,28 @@ class ActionQuality(ActionExecutor):
             'recommendations': []
         }
         
-        # 檢查包文件
+        # Check包File
         for file_path in event.file_paths:
             file_name = Path(file_path).name
             if file_name in ['package.json', 'requirements.txt', 'Cargo.toml', 'go.mod', 'pom.xml']:
                 dependencies['package_files'].append(file_path)
         
-        # 模擬依賴分析
+        # 模擬依賴Analyze
         if dependencies['package_files']:
-            dependencies['recommendations'].append("建議定期更新依賴套件")
-            dependencies['recommendations'].append("使用工具檢查已知安全漏洞")
+            dependencies['recommendations'].append("建議定期Update依賴套件")
+            dependencies['recommendations'].append("使用ToolCheck已知安全漏洞")
         
         return dependencies
     
     def _similarity_check(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """相似性檢查"""
+        """Similarity check"""
         similarity_threshold = parameters.get('threshold', 0.8)
         
-        # 簡化的相似性檢查
+        # 簡化的Similarity check
         similar_pairs = []
         files_content = {}
         
-        # 讀取所有文件內容
+        # 讀取所有FileContent
         for file_path in event.file_paths:
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
@@ -328,7 +328,7 @@ class ActionQuality(ActionExecutor):
             except:
                 continue
         
-        # 比較文件相似性
+        # 比較File相似性
         file_paths = list(files_content.keys())
         for i in range(len(file_paths)):
             for j in range(i + 1, len(file_paths)):
@@ -353,7 +353,7 @@ class ActionQuality(ActionExecutor):
         }
     
     def _calculate_similarity(self, content1: str, content2: str) -> float:
-        """計算內容相似度"""
+        """計算Content相似度"""
         # 簡化的相似度計算
         lines1 = set(line.strip() for line in content1.splitlines() if line.strip())
         lines2 = set(line.strip() for line in content2.splitlines() if line.strip())
@@ -369,25 +369,25 @@ class ActionQuality(ActionExecutor):
         return intersection / union if union > 0 else 0.0
     
     def _generate_quality_recommendations(self, results: List[Dict[str, Any]]) -> List[str]:
-        """生成品質建議"""
+        """GenerateQuality建議"""
         recommendations = []
         
         total_errors = sum(r.get('errors', 0) for r in results)
         total_warnings = sum(r.get('warnings', 0) for r in results)
         
         if total_errors > 0:
-            recommendations.append(f"優先修復 {total_errors} 個錯誤")
+            recommendations.append(f"優先修復 {total_errors} 個Error")
         
         if total_warnings > 10:
-            recommendations.append(f"建議處理 {total_warnings} 個警告")
+            recommendations.append(f"建議Process {total_warnings} 個Warning")
         
-        # 基於檢查器類型的建議
+        # 基於Check器Type的建議
         checkers_used = set(r.get('checker', '') for r in results)
         if 'javascript' in checkers_used or 'typescript' in checkers_used:
             recommendations.append("建議啟用 ESLint 自動修復")
         
         if 'python' in checkers_used:
-            recommendations.append("建議使用 Black 進行代碼格式化")
+            recommendations.append("建議使用 Black 進行Code formatting")
         
         return recommendations
     

@@ -1,0 +1,894 @@
+掃描中文字符並Generate翻譯對照表
+基於條件匹配決定觸發哪些規則
+Check是否有不必要的循環或遞歸
+基於關鍵字密度和明確性計算
+判斷規則是否應該應用於Event
+為核心業務邏輯編寫單元Test
+In actual implementation時Execute真正的Format化
+實施端到端Test覆蓋User流程
+包含所有專門化的Action Executor
+根據項目選擇合適的Test框架
+建議Optimize工作流程以提升效率
+實施適當的身份Validate和Authorization
+添加集成TestValidateComponent交互
+CheckSession中特定Event的計數
+考慮使用Cache機制提升性能
+基於Code analysisResult進行審查
+建議Evaluate並緩解識別的風險
+建議Continue監控資源使用情況
+建議指定FileType或副檔名
+計算循環複雜度和嵌套深度
+實現按FileTypeQuery的邏輯
+使用ToolCheck已知安全漏洞
+Check是否需要重置Time窗口
+新Create的代碼建議添加Test
+複雜Operation可能需要額外Test
+建議說明修改的原因或目的
+根據Event type解析特定字段
+In actual implementation時可以直接調用
+判斷是否為代碼修改Event
+Detection到Tool快速切換模式
+CheckFileSize大於指定值
+Tool使用頻率呈上升趨勢
+In actual implementation時Send真實Email
+不在這裡註冊內建Execute器
+明確說明要Execute什麼Action
+條件EvaluateFailed時DefaultExecute
+提取重複代碼到公共函數
+Failed時是否阻止後續Process
+從上下文獲取Circuit breakerStatus
+負責Execute action和Action管道
+實現UpdateMemory record的邏輯
+可能改善代碼性能或結構
+基於File數量和Size估計
+負責規則匹配和條件判斷
+Check距離上次Event的Time
+可以後續Connection到Session節點
+優先Process發現的代碼問題
+如果Quality checkModule不可用
+整合現有的Quality checkSystem
+包含具體動詞增加信心度
+Check是否匹配正則表達式
+Check是否包含特定關鍵字
+Check是否可以嘗試恢復
+基於Check器Type的建議
+建議定期Update依賴套件
+重新LoadAction管道Configuration
+建議提供更多具體細節
+Notification需要更複雜的實現
+批量修改可能引入Error
+AnalyzeSession中的所有Event
+嘗試作為ActionTypeExecute
+建議使用適當的Format化
+判斷是否有阻止性Error
+這個Method可以直接調用
+基於FileType添加標籤
+從上下文獲取歷史Record
+當前Session活動水平較高
+獲取中文詞的英文翻譯
+充分利用已識別的優勢
+統計安全問題嚴重程度
+實現MemoryData導出邏輯
+In actual implementation時可以Send到
+File修改活動保持穩定
+In actual implementation時Execute真正的
+匹配適用於Event的規則
+判斷是否應該Execute步驟
+按Time排序並限制數量
+建議Execute代碼Quality check
+查找預定義管道或Action
+實際應基於Time戳計算
+代碼使用現代異步模式
+Check當前Operation是否Success
+基於Event type計算分數
+負責註冊Module化Execute器
+基於Event type提供建議
+Check最近Event中的模式
+Check是否包含代碼模式
+標準化和過濾File path
+動態獲取Event屬性值
+簡化的複合條件解析
+Record event到MemorySystem
+Ready完整的Record結構
+安全地讀取FileContent
+這裡是一些相關Information
+所有條件都必須滿足
+OptimizeData結構的使用
+使用一致的命名約定
+避免使用模糊指代詞
+Detection到重複Operation模式
+簡化的文本Analyze實現
+個不重複的中文詞彙
+簡化的Rate limit實現
+限制可用的命名空間
+Check是否包含關鍵字
+按FileTypeQueryEvent
+增加代碼註解和文檔
+從ConfigurationFileLoad管道
+從ConfigurationFileLoad規則
+獲取當前Session上下文
+Check是否為TestFile
+根據問題和Warning扣分
+提取提示中的關鍵字
+次Success則關閉Circuit breaker
+長度適中增加信心度
+簡化的函數調用Process
+代碼複雜度有所改善
+Quality Check Action Executor
+Conditional Control Action Executor
+基於關鍵字添加標籤
+可能包含硬編碼密碼
+AnalyzeFileType和特徵
+技術詞彙增加信心度
+查看緩衝區頂部Data
+DataProcess為標準Event
+Memory Record Action Executor
+使用Parameters化Query防止
+清理過期的Cache項目
+分支語句增加複雜度
+Evaluate正則表達式條件
+Data轉換為標準Event
+Prompt Processing Action Executor
+Save到本地RecordFile
+估計Session持續Time
+Load規則ConfigurationFailed
+Execute具體Action管道
+刷新緩衝區到目標
+替換內建函數調用
+簡單的關鍵字匹配
+CheckCacheSize限制
+Load管道ConfigurationFailed
+獲取規則統計Information
+根據技術詞彙調整
+當前性能表現良好
+開始Test三層流程
+簡化的關鍵字提取
+Detection重複Operation模式
+Check最大Size限制
+DetectionTool切換模式
+註冊內建條件函數
+簡單的Effort estimation
+新增了代碼或文檔
+ExecuteConditional controlAction
+基於意圖添加標籤
+Delete了File或Content
+以上的代碼覆蓋率
+Configuration重新LoadSuccess
+解析User promptEvent
+提供Data緩衝Function
+Validate所有User輸入
+Update平均Processing time
+ExecuteQuality checkAction
+簡化的生產力計算
+推入Data到緩衝區
+取前兩句作為摘要
+解析後的標準字段
+重新Load規則Configuration
+獲取所有RecordFile
+提供DataCacheFunction
+File中的中文詞彙
+從緩衝區彈出Data
+AnalyzeFileOperation模式
+ExecuteMemoryRecord action
+獲取嚴重程度顏色
+簡化的相似度計算
+CheckFile path模式
+實現Session總結邏輯
+ExecutePrompt processingAction
+過濾和標準化Path
+AnalyzeFileType分布
+考慮提取公共邏輯
+找出最高分的類別
+包含核心ComponentFunction
+計算函數和類數量
+CheckCache是否存在
+代碼結構組織合理
+獲取最常用的Tool
+基於複雜度的建議
+判斷是否超出限制
+Unsupported的QueryType
+Check規則是否啟用
+Extract keywords和意圖
+安全的表達式Evaluate
+讀取所有FileContent
+也Record到Knowledge Graph
+簡化的Similarity check
+In actual implementation時Send到
+簡化的文本Generate
+簡化的摘要實現
+中英翻譯對照表
+移除最舊的項目
+估計提示複雜度
+計算生產力分數
+獲取緩衝區Size
+按ActionType統計
+Utility Action Executor
+負責規則的Load
+Record最近的Event
+提取最近的Event
+Analyze工作流模式
+中提取目標文本
+Execute對應的Action
+基於問題的建議
+建議Check一致性
+CreateEvaluate上下文
+UpdateSession上下文
+風格的模式匹配
+進行Code formatting
+估計Operation複雜度
+Check代碼複雜度
+如果指定了目標
+個高複雜度File
+清理空的緩衝區
+比較File相似性
+捕獲和分類Event
+Quality checkExecute器
+Generate完整性建議
+Analysis Action Executor
+核心ComponentInitialize
+根據具體性調整
+每分鐘最大次數
+註冊Action Executor
+這裡可以整合到
+CheckFile副檔名
+按ToolQueryEvent
+計算Content相似度
+負責Event的Receive
+Notification Action Executor
+移除最舊的Data
+簡單的ResultCache
+沒有Record時返回
+簡單的條件Evaluate
+避免Memory體問題
+的技術Analyze如下
+簡單的翻譯邏輯
+修改了現有代碼
+AI Action Executor
+簡化的Sentiment analysis
+列出所有緩衝區
+計算意圖信心度
+提取技術關鍵字
+建議分步驟Execute
+內建Execute器實現
+匹配和Execute決策
+Generate清晰度建議
+簡化的翻譯實現
+估計代碼複雜度
+In actual implementation時Send
+適用的Event type
+簡化的分類實現
+自定義函數條件
+如果沒有匹配的
+Check硬編碼密碼
+User提交了提示
+改善了文檔Quality
+Memory recordExecute器
+提取相關上下文
+Query最近的Event
+Generate翻譯對照表
+可能包含硬編碼
+Update管道上下文
+遞歸Evaluate子條件
+從環境變量提取
+生產力表現良好
+Execute完整流程
+注意適當休息
+UpdateSessionStatus
+與意圖的關係
+Execute toolOperation
+重新LoadConfiguration
+動態添加規則
+Health checkOperation
+獲取Execute統計
+CheckEvent type
+計算嵌套深度
+Update訪問統計
+Evaluate規則條件
+Execute action管道
+函數條件Format
+未知AnalyzeType
+AnalyzeEvent模式
+未知NotificationType
+估計User意圖
+獲取Cache統計
+包含模糊用詞
+Detection編程語言
+Detection代碼問題
+代碼Static check
+與Session的關係
+Execute action列表
+SystemInformationOperation
+Detection研究模式
+清空所有Cache
+模擬依賴Analyze
+提取目標對象
+Rate limit邏輯
+直接Execute action
+Record當前Request
+Check是否過期
+Evaluate複合條件
+計算註解行數
+Analyze導入語句
+估計主要意圖
+保持當前節奏
+GenerateQuality建議
+Detection程式語言
+簡單條件Evaluate
+Analyze函數定義
+Ready關係Data
+使用基本Check
+收到User prompt
+按優先級排序
+GenerateEvent摘要
+解析NotificationEvent
+Analyze單files
+計算提示分數
+讀取FileContent
+解析規則Configuration
+Execute toolAction
+CreateRecordDirectory
+無法讀取File
+基本ToolOperation
+ExecuteMemory record
+獲取規則統計
+建議優先Process
+基本Quality check
+建議使用空格
+提取Action動詞
+Analyze提示Content
+解析管道Configuration
+查找中文字符
+模擬Processing time
+調用條件函數
+Ready節點Data
+Check基本問題
+解析ToolEvent
+File path模式
+物件式命名法
+提取統計Information
+包含代碼片段
+ExecuteAnalysis action
+ReadyExecute tool
+語言特定問題
+User提交提示
+獲取Action統計
+Evaluate直接影響
+ExecuteQuality check
+ExecuteNotification action
+提取File path
+Detection代碼模式
+Simulate emailSend
+涉及多files
+條件EvaluateFailed
+Update規則統計
+簡化的信心度
+Generate技術建議
+Three-layer Flow Engine
+寫入日誌File
+包含調試代碼
+Generate改進建議
+統計FileType
+Loop control邏輯
+獲取SystemStatus
+技術詞彙較多
+Execute單個Action
+GenerateDefaultMessage
+Evaluate單個條件
+清理過期Cache
+Test完整流程
+匹配Path模式
+基本Security scan
+計算影響分數
+與Time的關係
+Evaluate函數條件
+限制最多Generate
+提取次要意圖
+要Execute的Action
+Check排除模式
+Generate基本建議
+Generate代碼建議
+統計FileSize
+統計InformationAnalyze
+缺少函數結構
+限制ContentSize
+內建條件函數
+Generate代碼總結
+核心ComponentOperation
+影響多files
+導出MemoryData
+GenerateTest建議
+最近活動Analyze
+根據長度調整
+Evaluate簡單條件
+與Tool的關係
+使用DefaultAction
+註冊Action管道
+Check模糊用詞
+導出Execute報告
+解析和標準化
+模擬EventData
+可能不夠具體
+獲取ActionType
+Process輸入Data
+AnalyzeTool偏好
+未找到Execute器
+識別編程語言
+Check冷卻Time
+Execute管道步驟
+是否異步Execute
+Quality checkFailed
+Analyze導出語句
+Analyze代碼結構
+Generate詳細Message
+CheckInterrupted條件
+UpdateMemory record
+提取SessionInformation
+Action流Execute器
+RecordExecute歷史
+Generate使用洞察
+估計活動水平
+SessionInformationAnalyze
+獲取統計Information
+包含核心Component
+Generate代碼洞察
+請具體說明
+NotificationExecute器
+條件表達式
+Event元Data
+直接Record到
+Effort estimation
+輸出對照表
+Send到前端
+添加Time戳
+清空緩衝區
+No file operations
+AnalyzeExecute器
+會發生什麼
+或Message隊列
+這可以通過
+上下文Information
+尋找匹配的
+Time戳Operation
+未找到管道
+Save到File
+複雜度洞察
+代碼複雜度
+Analyze類定義
+需求明確度
+Similarity check
+Flow Coordinator
+建議Module化
+如果Configuration了
+Format化日誌
+Code formatting
+估計工作量
+Event Processor
+Format化代碼
+Analyze上下文
+實際Record到
+建議更具體
+Check包File
+ToolExecute器
+ResultSave到
+Event的Record
+排序並取前
+條件Execute器
+GenerateFile名
+Action Executor
+過濾停用詞
+Extract keywords
+基礎信心度
+移動到末尾
+Update上下文
+Console notification
+Check是否有
+Evaluate表達式
+Detection源語言
+Format化File
+個代碼問題
+Circuit breaker邏輯
+按長度排序
+移除點號
+MessageFormat
+行動項目
+Memory相關
+Translate text
+Unknown operation
+規則定義
+建議簡化
+SettingsCache
+恢復Data
+Involved files
+負責Execute
+建議啟用
+Time窗口
+日誌Operation
+Code review
+移除規則
+ExecuteNotification
+並發模式
+問題洞察
+增強提示
+Knowledge Graph
+Execute action
+簡化實現
+注入風險
+Analyze代碼
+Network相關
+Suggestion generation
+負責管理
+自動修復
+QueryMemory
+通用模式
+建議達到
+ExecuteOperation
+技術難度
+提示過短
+文本分類
+Notification相關
+負責協調
+長詞在前
+建議清理
+Detection模式
+Loop control
+標準化的
+啟用規則
+User prompt
+Rate limit
+Dependency check
+架構模式
+Generate text
+然後使用
+安全掃描
+File path
+Generate洞察
+統計詞頻
+基於提示
+Pattern analysis
+Evaluate condition
+掃描所有
+禁用規則
+提示過長
+Execute控制
+架構說明
+Prompt processing
+統計Information
+Static check
+Email notification
+結構良好
+順序Execute
+條件限制
+特定詞組
+模擬Data
+Analyze文本
+Security scan
+Evaluate收益
+想像一下
+獲取Cache
+Health check
+Execute管道
+Generate總結
+Update統計
+通用問題
+建議Process
+提取意圖
+寫入File
+SystemOperation
+Event type
+Impact analysis
+相關Function
+總結Session
+Basic analysis
+規則屬性
+Quality相關
+Evaluate風險
+Quality check
+GenerateOperation
+Performance analysis
+使用Tool
+File相關
+建議使用
+Conditional control
+User意圖
+Generate建議
+負責Process
+ComponentOperation
+Action相關
+Trend analysis
+計算分數
+Pattern detection
+基本Check
+Tool name
+System相關
+規則統計
+SaveRecord
+並行Execute
+可能存在
+圖標映射
+Sentiment analysis
+ErrorProcess
+DeleteCache
+Validate提示
+文本摘要
+建議重構
+TestComplete
+Processing time
+模式洞察
+Execute tool
+Evaluate優點
+Detection編輯
+規則條件
+延遲Operation
+冷卻Time
+Generate標籤
+條件Execute
+Usage analysis
+保持最近
+Prepare to execute
+Rule Engine
+Evaluate缺點
+優先修復
+匹配規則
+輸出Notification
+ExecuteAnalyze
+User相關
+Status描述
+AnalyzeFile
+發生Time
+Test循環
+先Save為
+System notification
+基本Action
+清理Operation
+複雜度
+專注於
+Circuit breaker
+Format的
+個Warning
+將原始
+為什麼
+假設每
+行需要
+Unsupported
+改一下
+註解詞
+Server
+行包含
+User
+不移除
+個Error
+將使用
+Client
+Unsupported
+In progress
+Record到
+files
+規則層
+複合詞
+行過長
+翻譯到
+個Event
+我覺得
+深綠色
+File數
+條Record
+Initialize
+Executing
+Event層
+修一下
+元Data
+Server
+關鍵字
+Administrator
+Analyze等
+掃描了
+Function
+小時
+分鐘
+實現
+技術
+循環
+除錯
+Stop
+Failed
+負責
+改善
+提升
+Connection
+基於
+灰色
+來自
+Query
+調試
+Authentication
+Request
+Type
+意圖
+紅色
+可選
+介紹
+Default
+感覺
+Operation
+邏輯
+搜索
+去除
+Execute
+市場
+Notification
+Information
+Response
+說明
+備份
+新增
+User
+個人
+橙色
+Permanent
+Pause
+Message
+藍色
+清除
+Data
+Module
+說到
+Directory
+Score
+涉及
+去重
+最近
+導入
+Component
+Connection
+重構
+提取
+Permission
+System
+Temporary
+編程
+描述
+Start
+延遲
+青色
+利潤
+Interface
+Check
+調用
+Response
+Create
+增強
+分享
+Save
+這個
+優秀
+調整
+Detection
+未知
+關於
+Message
+Network
+開心
+修改
+Options
+Record
+提供
+File
+原因
+Event
+一些
+解決
+發現
+Memory
+Storage
+Interrupted
+綠色
+Continue
+Update
+Reminder
+Size
+改變
+Cache
+Service
+估計
+包含
+前端
+編輯
+Optimize
+Method
+連續
+Tool
+Test
+Storage
+Ready
+Error
+注入
+Content
+某些
+Level
+密鑰
+Authorization
+項目
+Settings
+添加
+Component
+Action
+商業
+你好
+對於
+移除
+Network
+Send
+Parameters
+Receive
+Configuration
+Success
+其他
+難過
+Client
+Default
+糟糕
+列表
+Analyze
+清理
+讀取
+Warning
+謝謝
+Exception
+註解
+Create
+排除
+File
+Time
+支持
+Waiting
+語句
+獲取
+如果
+發布
+Process
+Interface
+Load
+Email
+Delete
+Running
+日記
+Quality
+Validate
+Status
+修復
+用於
+代碼
+Format
+那個
+Conversation
+解釋
+字符
+Quality
+Evaluate
+Result
+Path
+Data
+Session
+模擬
+Date
+Complete
+Generate
+製作
+容器
+好
+值
+的
+或
+棒
+個
+壞
+從
+找
+和
+由
+等
+無
+秒
+寫
+改
+第

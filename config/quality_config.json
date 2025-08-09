@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "description": "MindNext 代碼品質檢查配置",
+  "description": "MindNext 代碼Quality checkConfiguration",
   "general": {
     "auto_fix": true,
     "cache_enabled": true,
@@ -89,7 +89,7 @@
   },
   "project_overrides": {
     "mindnext": {
-      "description": "MindNext 專案特殊配置",
+      "description": "MindNext 專案特殊Configuration",
       "python": {
         "max_line_length": 120,
         "check_prints": false,

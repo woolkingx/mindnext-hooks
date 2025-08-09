@@ -65,23 +65,23 @@ class ActionExecutor(ABC):
     
     @abstractmethod
     def execute(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """執行動作"""
+        """Execute action"""
         pass
     
     @abstractmethod
     def get_action_type(self) -> str:
-        """獲取動作類型"""
+        """獲取ActionType"""
         pass
 
 class ActionFlowExecutor:
-    """動作流執行器 - 負責執行動作和動作管道"""
+    """Action流Execute器 - 負責Execute action和Action管道"""
     
     def __init__(self):
         self.executors: Dict[str, ActionExecutor] = {}
         self.pipelines: Dict[str, ActionPipeline] = {}
         self.execution_history: List[Dict[str, Any]] = []
         
-        # 不在這裡註冊內建執行器，由 FlowCoordinator 負責註冊模組化執行器
+        # 不在這裡註冊內建Execute器，由 FlowCoordinator 負責註冊Module化Execute器
     
     def _register_builtin_executors(self):
         """Register builtin executors - Deprecated: Use modular actions instead"""
@@ -90,15 +90,15 @@ class ActionFlowExecutor:
         pass
     
     def register_executor(self, executor: ActionExecutor):
-        """註冊動作執行器"""
+        """註冊Action Executor"""
         self.executors[executor.get_action_type()] = executor
     
     def register_pipeline(self, pipeline: ActionPipeline):
-        """註冊動作管道"""
+        """註冊Action管道"""
         self.pipelines[pipeline.pipeline_id] = pipeline
     
     def load_pipelines_from_config(self, config_path: str):
-        """從配置文件載入管道"""
+        """從ConfigurationFileLoad管道"""
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
                 config = json.load(f)
@@ -108,10 +108,10 @@ class ActionFlowExecutor:
                 self.register_pipeline(pipeline)
                 
         except Exception as e:
-            print(f"載入管道配置失敗: {e}")
+            print(f"Load管道ConfigurationFailed: {e}")
     
     def _parse_pipeline_config(self, pipeline_data: Dict[str, Any]) -> ActionPipeline:
-        """解析管道配置"""
+        """解析管道Configuration"""
         steps = []
         for step_data in pipeline_data.get('steps', []):
             step = ActionStep(
@@ -142,7 +142,7 @@ class ActionFlowExecutor:
         return pipeline
     
     async def execute_actions(self, action_ids: List[str], event: HookEvent, context: Dict[str, Any] = None) -> List[ActionResult]:
-        """執行動作列表"""
+        """Execute action列表"""
         if context is None:
             context = {}
         
@@ -150,11 +150,11 @@ class ActionFlowExecutor:
         
         for action_id in action_ids:
             if action_id in self.pipelines:
-                # 執行管道
+                # Execute管道
                 pipeline_result = await self.execute_pipeline(action_id, event, context)
                 results.extend(pipeline_result)
-            elif '/' in action_id:  # 格式: action_type/parameters
-                # 直接執行動作
+            elif '/' in action_id:  # Format: action_type/parameters
+                # 直接Execute action
                 action_type, param_str = action_id.split('/', 1)
                 try:
                     parameters = json.loads(param_str) if param_str else {}
@@ -164,19 +164,19 @@ class ActionFlowExecutor:
                 result = await self.execute_single_action(action_type, event, parameters, context)
                 results.append(result)
             else:
-                # 查找預定義管道或動作
+                # 查找預定義管道或Action
                 if action_id in self.pipelines:
                     pipeline_result = await self.execute_pipeline(action_id, event, context)
                     results.extend(pipeline_result)
                 else:
-                    # 嘗試作為動作類型執行
+                    # 嘗試作為ActionTypeExecute
                     result = await self.execute_single_action(action_id, event, {}, context)
                     results.append(result)
         
         return results
     
     async def execute_single_action(self, action_type: str, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """執行單個動作"""
+        """Execute單個Action"""
         start_time = datetime.now()
         
         try:
@@ -185,12 +185,12 @@ class ActionFlowExecutor:
                     action_id=action_type,
                     success=False,
                     execution_time=0.0,
-                    error=f"未找到執行器: {action_type}"
+                    error=f"未找到Execute器: {action_type}"
                 )
             
             executor = self.executors[action_type]
             
-            # 執行動作
+            # Execute action
             if asyncio.iscoroutinefunction(executor.execute):
                 result = await executor.execute(event, parameters, context)
             else:
@@ -199,7 +199,7 @@ class ActionFlowExecutor:
             execution_time = (datetime.now() - start_time).total_seconds()
             result.execution_time = execution_time
             
-            # 記錄執行歷史
+            # RecordExecute歷史
             self._record_execution(action_type, result, event)
             
             return result
@@ -217,7 +217,7 @@ class ActionFlowExecutor:
             return result
     
     async def execute_pipeline(self, pipeline_id: str, event: HookEvent, context: Dict[str, Any]) -> List[ActionResult]:
-        """執行動作管道"""
+        """Execute action管道"""
         if pipeline_id not in self.pipelines:
             return [ActionResult(
                 action_id=pipeline_id,
@@ -232,7 +232,7 @@ class ActionFlowExecutor:
         pipeline_context['pipeline_data'] = {}
         
         if pipeline.parallel_execution:
-            # 並行執行
+            # 並行Execute
             tasks = []
             for step in pipeline.steps:
                 if self._should_execute_step(step, event, pipeline_context):
@@ -252,30 +252,30 @@ class ActionFlowExecutor:
                     else:
                         results.append(result)
         else:
-            # 順序執行
+            # 順序Execute
             for step in pipeline.steps:
                 if self._should_execute_step(step, event, pipeline_context):
                     result = await self._execute_pipeline_step(step, event, pipeline_context)
                     results.append(result)
                     
-                    # 更新管道上下文
+                    # Update管道上下文
                     if result.success and step.output_to:
                         pipeline_context['pipeline_data'][step.output_to] = result.output
                     
-                    # 錯誤處理
+                    # ErrorProcess
                     if not result.success and pipeline.stop_on_error and step.required:
                         break
         
         return results
     
     def _should_execute_step(self, step: ActionStep, event: HookEvent, context: Dict[str, Any]) -> bool:
-        """判斷是否應該執行步驟"""
+        """判斷是否應該Execute步驟"""
         if not step.condition:
             return True
         
-        # 簡單的條件評估
+        # 簡單的條件Evaluate
         try:
-            # 建立評估上下文
+            # CreateEvaluate上下文
             eval_context = {
                 'event': event,
                 'context': context,
@@ -286,24 +286,24 @@ class ActionFlowExecutor:
             
             return eval(step.condition, {"__builtins__": {}}, eval_context)
         except:
-            return True  # 條件評估失敗時預設執行
+            return True  # 條件EvaluateFailed時DefaultExecute
     
     async def _execute_pipeline_step(self, step: ActionStep, event: HookEvent, context: Dict[str, Any]) -> ActionResult:
-        """執行管道步驟"""
+        """Execute管道步驟"""
         parameters = step.parameters.copy()
         
-        # 處理輸入數據
+        # Process輸入Data
         if step.input_from and step.input_from in context.get('pipeline_data', {}):
             parameters['input_data'] = context['pipeline_data'][step.input_from]
         
-        # 執行動作
+        # Execute action
         result = await self.execute_single_action(step.action_type, event, parameters, context)
         result.action_id = step.action_id
         
         return result
     
     def _record_execution(self, action_type: str, result: ActionResult, event: HookEvent):
-        """記錄執行歷史"""
+        """RecordExecute歷史"""
         record = {
             'timestamp': datetime.now().isoformat(),
             'action_type': action_type,
@@ -317,18 +317,18 @@ class ActionFlowExecutor:
         
         self.execution_history.append(record)
         
-        # 保持最近 1000 條記錄
+        # 保持最近 1000 條Record
         self.execution_history = self.execution_history[-1000:]
     
     def get_execution_statistics(self) -> Dict[str, Any]:
-        """獲取執行統計"""
+        """獲取Execute統計"""
         if not self.execution_history:
             return {}
         
         total_executions = len(self.execution_history)
         successful_executions = sum(1 for record in self.execution_history if record['success'])
         
-        # 按動作類型統計
+        # 按ActionType統計
         action_stats = {}
         for record in self.execution_history:
             action_type = record['action_type']
@@ -346,18 +346,18 @@ class ActionFlowExecutor:
             'action_statistics': action_stats
         }
 
-# 內建執行器實現
+# 內建Execute器實現
 
 class QualityCheckExecutor(ActionExecutor):
-    """品質檢查執行器"""
+    """Quality checkExecute器"""
     
     def get_action_type(self) -> str:
         return "quality_check"
     
     def execute(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """執行品質檢查"""
+        """ExecuteQuality check"""
         try:
-            # 整合現有的品質檢查系統
+            # 整合現有的Quality checkSystem
             from ..quality_modules import PythonQualityChecker, JavaScriptQualityChecker, TypeScriptQualityChecker
             
             checkers = {
@@ -384,7 +384,7 @@ class QualityCheckExecutor(ActionExecutor):
                         'result': result
                     })
             
-            # 判斷是否有阻止性錯誤
+            # 判斷是否有阻止性Error
             has_blocking_errors = any(r['errors'] > 0 for r in all_results)
             
             return ActionResult(
@@ -408,15 +408,15 @@ class QualityCheckExecutor(ActionExecutor):
             )
 
 class MemoryRecordExecutor(ActionExecutor):
-    """記憶記錄執行器"""
+    """Memory recordExecute器"""
     
     def get_action_type(self) -> str:
         return "memory_record"
     
     def execute(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """執行記憶記錄"""
+        """ExecuteMemory record"""
         try:
-            # 這裡可以整合到 MindNext Graph 系統
+            # 這裡可以整合到 MindNext Graph System
             record_data = {
                 'timestamp': datetime.now().isoformat(),
                 'event_type': event.event_type,
@@ -426,7 +426,7 @@ class MemoryRecordExecutor(ActionExecutor):
                 'metadata': event.metadata
             }
             
-            # TODO: 實際記錄到 QKVL 系統
+            # TODO: 實際Record到 QKVL System
             
             return ActionResult(
                 action_id="memory_record",
@@ -444,18 +444,18 @@ class MemoryRecordExecutor(ActionExecutor):
             )
 
 class NotificationExecutor(ActionExecutor):
-    """通知執行器"""
+    """NotificationExecute器"""
     
     def get_action_type(self) -> str:
         return "notification"
     
     def execute(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """執行通知"""
+        """ExecuteNotification"""
         try:
             message = parameters.get('message', '')
             severity = parameters.get('severity', 'info')
             
-            # 輸出通知
+            # 輸出Notification
             icons = {'info': '💡', 'warning': '⚠️', 'error': '❌', 'success': '✅'}
             icon = icons.get(severity, '📢')
             
@@ -477,13 +477,13 @@ class NotificationExecutor(ActionExecutor):
             )
 
 class AnalysisExecutor(ActionExecutor):
-    """分析執行器"""
+    """AnalyzeExecute器"""
     
     def get_action_type(self) -> str:
         return "analysis"
     
     def execute(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """執行分析"""
+        """ExecuteAnalyze"""
         try:
             analysis_type = parameters.get('type', 'basic')
             
@@ -497,12 +497,12 @@ class AnalysisExecutor(ActionExecutor):
                 'recommendations': []
             }
             
-            # 基於事件類型提供建議
+            # 基於Event type提供建議
             if event.event_type == "PostToolUse" and event.tool_name in ['Write', 'Edit']:
-                analysis_result['recommendations'].append("建議執行代碼品質檢查")
+                analysis_result['recommendations'].append("建議Execute代碼Quality check")
             
             if event.metadata.get('estimated_intent') == 'create':
-                analysis_result['recommendations'].append("新創建的代碼建議添加測試")
+                analysis_result['recommendations'].append("新Create的代碼建議添加Test")
             
             return ActionResult(
                 action_id="analysis",
@@ -520,19 +520,19 @@ class AnalysisExecutor(ActionExecutor):
             )
 
 class ConditionalExecutor(ActionExecutor):
-    """條件執行器"""
+    """條件Execute器"""
     
     def get_action_type(self) -> str:
         return "conditional"
     
     def execute(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """條件執行"""
+        """條件Execute"""
         try:
             condition = parameters.get('condition', 'True')
             true_action = parameters.get('true_action')
             false_action = parameters.get('false_action')
             
-            # 評估條件
+            # Evaluate condition
             eval_context = {
                 'event': event,
                 'context': context,
@@ -563,13 +563,13 @@ class ConditionalExecutor(ActionExecutor):
             )
 
 class UtilityExecutor(ActionExecutor):
-    """工具執行器"""
+    """ToolExecute器"""
     
     def get_action_type(self) -> str:
         return "utility"
     
     def execute(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """執行工具操作"""
+        """Execute toolOperation"""
         try:
             operation = parameters.get('operation', 'noop')
             
@@ -597,7 +597,7 @@ class UtilityExecutor(ActionExecutor):
                     action_id="utility",
                     success=False,
                     execution_time=0.0,
-                    error=f"未知操作: {operation}"
+                    error=f"Unknown operation: {operation}"
                 )
                 
         except Exception as e:

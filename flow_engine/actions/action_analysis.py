@@ -1,5 +1,5 @@
 """
-ActionAnalysis - 分析動作執行器
+ActionAnalysis - Analysis Action Executor
 """
 
 from typing import Dict, Any, List
@@ -10,13 +10,13 @@ from .action_base import ActionExecutor, ActionResult
 from ..event_layer import HookEvent
 
 class ActionAnalysis(ActionExecutor):
-    """分析動作執行器"""
+    """Analysis Action Executor"""
     
     def get_action_type(self) -> str:
         return "action.analysis"
     
     def execute(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """執行分析動作"""
+        """ExecuteAnalysis action"""
         start_time = datetime.now()
         
         try:
@@ -39,7 +39,7 @@ class ActionAnalysis(ActionExecutor):
                     action_id="action.analysis",
                     success=False,
                     execution_time=(datetime.now() - start_time).total_seconds(),
-                    error=f"未知分析類型: {analysis_type}"
+                    error=f"未知AnalyzeType: {analysis_type}"
                 )
             
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -60,7 +60,7 @@ class ActionAnalysis(ActionExecutor):
             )
     
     def _basic_analysis(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """基本分析"""
+        """Basic analysis"""
         analysis = {
             'event_summary': {
                 'type': event.event_type,
@@ -74,20 +74,20 @@ class ActionAnalysis(ActionExecutor):
             'recommendations': []
         }
         
-        # 生成基本建議
+        # Generate基本建議
         if event.event_type == "PostToolUse" and event.tool_name in ['Write', 'Edit']:
-            analysis['recommendations'].append("建議執行代碼品質檢查")
+            analysis['recommendations'].append("建議Execute代碼Quality check")
         
         if event.metadata.get('estimated_intent') == 'create':
-            analysis['recommendations'].append("新創建的代碼建議添加測試")
+            analysis['recommendations'].append("新Create的代碼建議添加Test")
         
         if len(event.file_paths) > 5:
-            analysis['recommendations'].append("涉及多個文件，建議檢查一致性")
+            analysis['recommendations'].append("涉及多files，建議Check一致性")
         
         return analysis
     
     def _analyze_files(self, file_paths: List[str]) -> Dict[str, Any]:
-        """分析文件"""
+        """AnalyzeFile"""
         if not file_paths:
             return {'total_files': 0}
         
@@ -99,10 +99,10 @@ class ActionAnalysis(ActionExecutor):
             path = Path(file_path)
             ext = path.suffix.lower()
             
-            # 統計文件類型
+            # 統計FileType
             file_types[ext] = file_types.get(ext, 0) + 1
             
-            # 統計文件大小
+            # 統計FileSize
             try:
                 total_size += path.stat().st_size
             except:
@@ -122,7 +122,7 @@ class ActionAnalysis(ActionExecutor):
         }
     
     def _detect_language(self, ext: str) -> str:
-        """檢測編程語言"""
+        """Detection編程語言"""
         lang_map = {
             '.py': 'Python',
             '.js': 'JavaScript',
@@ -141,18 +141,18 @@ class ActionAnalysis(ActionExecutor):
         return lang_map.get(ext, 'unknown')
     
     def _analyze_context(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        """分析上下文"""
+        """Analyze上下文"""
         context_analysis = {
             'session_info': {},
             'recent_activity': {},
             'patterns': []
         }
         
-        # 會話信息分析
+        # SessionInformationAnalyze
         if 'session_id' in context:
             context_analysis['session_info']['id'] = context['session_id']
         
-        # 最近活動分析
+        # 最近活動Analyze
         if 'recent_events' in context:
             recent = context['recent_events']
             context_analysis['recent_activity'] = {
@@ -161,7 +161,7 @@ class ActionAnalysis(ActionExecutor):
                 'tools_used': list(set(e.get('tool', '') for e in recent if e.get('tool')))
             }
         
-        # 統計信息分析
+        # 統計InformationAnalyze
         if 'stats' in context:
             stats = context['stats']
             context_analysis['session_stats'] = {
@@ -172,7 +172,7 @@ class ActionAnalysis(ActionExecutor):
         return context_analysis
     
     def _get_top_tools(self, tool_stats: Dict[str, int]) -> List[Dict[str, Any]]:
-        """獲取最常用的工具"""
+        """獲取最常用的Tool"""
         if not tool_stats:
             return []
         
@@ -180,55 +180,55 @@ class ActionAnalysis(ActionExecutor):
         return [{'tool': tool, 'count': count} for tool, count in sorted_tools[:3]]
     
     def _trend_analysis(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """趨勢分析"""
+        """Trend analysis"""
         return {
             'analysis_type': 'trend',
             'time_period': parameters.get('period', 'session'),
             'trends': {
-                'tool_usage_trend': 'increasing',  # 模擬數據
+                'tool_usage_trend': 'increasing',  # 模擬Data
                 'file_modification_trend': 'stable',
                 'complexity_trend': 'decreasing'
             },
             'insights': [
-                "工具使用頻率呈上升趨勢",
-                "文件修改活動保持穩定",
+                "Tool使用頻率呈上升趨勢",
+                "File修改活動保持穩定",
                 "代碼複雜度有所改善"
             ]
         }
     
     def _pattern_analysis(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """模式分析"""
+        """Pattern analysis"""
         patterns = []
         
-        # 分析事件模式
+        # AnalyzeEvent模式
         if context.get('recent_events'):
             recent = context['recent_events']
             
-            # 檢測重複操作模式
+            # Detection重複Operation模式
             event_types = [e.get('type') for e in recent[-5:]]
             if len(set(event_types)) < len(event_types):
                 patterns.append({
                     'type': 'repetitive_operations',
-                    'description': '檢測到重複操作模式',
+                    'description': 'Detection到重複Operation模式',
                     'confidence': 0.8
                 })
             
-            # 檢測工具切換模式
+            # DetectionTool切換模式
             tools = [e.get('tool') for e in recent[-3:] if e.get('tool')]
             if len(set(tools)) == len(tools) and len(tools) > 1:
                 patterns.append({
                     'type': 'tool_switching',
-                    'description': '檢測到工具快速切換模式',
+                    'description': 'Detection到Tool快速切換模式',
                     'confidence': 0.7
                 })
         
-        # 分析文件操作模式
+        # AnalyzeFileOperation模式
         if event.file_paths:
             file_types = [Path(fp).suffix for fp in event.file_paths]
             if len(set(file_types)) == 1:
                 patterns.append({
                     'type': 'single_file_type_focus',
-                    'description': f'專注於 {file_types[0]} 文件',
+                    'description': f'專注於 {file_types[0]} File',
                     'confidence': 0.9
                 })
         
@@ -240,11 +240,11 @@ class ActionAnalysis(ActionExecutor):
         }
     
     def _performance_analysis(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """性能分析"""
+        """Performance analysis"""
         return {
             'analysis_type': 'performance',
             'metrics': {
-                'response_time': 'fast',      # 模擬數據
+                'response_time': 'fast',      # 模擬Data
                 'resource_usage': 'low',
                 'error_rate': 'minimal',
                 'throughput': 'optimal'
@@ -252,12 +252,12 @@ class ActionAnalysis(ActionExecutor):
             'bottlenecks': [],
             'recommendations': [
                 "當前性能表現良好",
-                "建議繼續監控資源使用情況"
+                "建議Continue監控資源使用情況"
             ]
         }
     
     def _usage_analysis(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """使用分析"""
+        """Usage analysis"""
         usage_stats = {
             'current_session': {
                 'duration': self._estimate_session_duration(context),
@@ -275,8 +275,8 @@ class ActionAnalysis(ActionExecutor):
         }
     
     def _estimate_session_duration(self, context: Dict[str, Any]) -> str:
-        """估計會話持續時間"""
-        # 簡化實現，實際應基於時間戳計算
+        """估計Session持續Time"""
+        # 簡化實現，實際應基於Time戳計算
         return "估計 30 分鐘"
     
     def _estimate_activity_level(self, context: Dict[str, Any]) -> str:
@@ -296,14 +296,14 @@ class ActionAnalysis(ActionExecutor):
         if not stats:
             return 0.5
         
-        # 基於事件類型計算分數
+        # 基於Event type計算分數
         productive_events = stats.get('PostToolUse', 0)
         total_events = sum(stats.values()) if isinstance(stats, dict) else 1
         
         return min(1.0, productive_events / total_events)
     
     def _analyze_tool_preferences(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        """分析工具偏好"""
+        """AnalyzeTool偏好"""
         tool_stats = context.get('stats', {}).get('tools', {})
         
         if not tool_stats:
@@ -319,42 +319,42 @@ class ActionAnalysis(ActionExecutor):
         }
     
     def _analyze_workflow_patterns(self, context: Dict[str, Any]) -> List[str]:
-        """分析工作流模式"""
+        """Analyze工作流模式"""
         patterns = []
         recent_events = context.get('recent_events', [])
         
         if len(recent_events) < 3:
             return patterns
         
-        # 檢測編輯-測試循環
+        # Detection編輯-Test循環
         tools = [e.get('tool') for e in recent_events[-5:]]
         if 'Edit' in tools and ('Test' in tools or 'Bash' in tools):
             patterns.append('edit_test_cycle')
         
-        # 檢測研究模式
+        # Detection研究模式
         if 'Read' in tools and 'Grep' in tools:
             patterns.append('research_pattern')
         
         return patterns
     
     def _generate_usage_insights(self, usage_stats: Dict[str, Any]) -> List[str]:
-        """生成使用洞察"""
+        """Generate使用洞察"""
         insights = []
         
         activity_level = usage_stats['current_session']['activity_level']
         if activity_level == 'high':
-            insights.append("當前會話活動水平較高，注意適當休息")
+            insights.append("當前Session活動水平較高，注意適當休息")
         
         productivity = usage_stats['current_session']['productivity_score']
         if productivity > 0.7:
             insights.append("生產力表現良好，保持當前節奏")
         elif productivity < 0.3:
-            insights.append("建議優化工作流程以提升效率")
+            insights.append("建議Optimize工作流程以提升效率")
         
         return insights
     
     def _impact_analysis(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """影響分析"""
+        """Impact analysis"""
         impact = {
             'immediate_impact': self._assess_immediate_impact(event),
             'potential_risks': self._assess_risks(event),
@@ -362,9 +362,9 @@ class ActionAnalysis(ActionExecutor):
             'recommendations': []
         }
         
-        # 生成建議
+        # Generate建議
         if impact['potential_risks']:
-            impact['recommendations'].append("建議評估並緩解識別的風險")
+            impact['recommendations'].append("建議Evaluate並緩解識別的風險")
         
         if impact['benefits']:
             impact['recommendations'].append("充分利用已識別的優勢")
@@ -376,7 +376,7 @@ class ActionAnalysis(ActionExecutor):
         }
     
     def _assess_immediate_impact(self, event: HookEvent) -> List[str]:
-        """評估直接影響"""
+        """Evaluate直接影響"""
         impacts = []
         
         if event.tool_name == 'Write':
@@ -384,34 +384,34 @@ class ActionAnalysis(ActionExecutor):
         elif event.tool_name == 'Edit':
             impacts.append("修改了現有代碼")
         elif event.tool_name == 'Delete':
-            impacts.append("刪除了文件或內容")
+            impacts.append("Delete了File或Content")
         
         if len(event.file_paths) > 1:
-            impacts.append("影響多個文件")
+            impacts.append("影響多files")
         
         return impacts
     
     def _assess_risks(self, event: HookEvent) -> List[str]:
-        """評估風險"""
+        """Evaluate風險"""
         risks = []
         
         if event.tool_name in ['Delete', 'MultiEdit'] and len(event.file_paths) > 3:
-            risks.append("批量修改可能引入錯誤")
+            risks.append("批量修改可能引入Error")
         
         if event.metadata.get('estimated_complexity') == 'complex':
-            risks.append("複雜操作可能需要額外測試")
+            risks.append("複雜Operation可能需要額外Test")
         
         return risks
     
     def _assess_benefits(self, event: HookEvent) -> List[str]:
-        """評估收益"""
+        """Evaluate收益"""
         benefits = []
         
         if event.metadata.get('estimated_intent') == 'optimize':
             benefits.append("可能改善代碼性能或結構")
         
         if event.tool_name in ['Write', 'Edit'] and any('.md' in fp for fp in event.file_paths):
-            benefits.append("改善了文檔質量")
+            benefits.append("改善了文檔Quality")
         
         return benefits
     

@@ -1,5 +1,5 @@
 """
-ActionPrompt - 提示處理動作執行器
+ActionPrompt - Prompt Processing Action Executor
 """
 
 from typing import Dict, Any
@@ -8,13 +8,13 @@ from .action_base import ActionExecutor, ActionResult
 from ..event_layer import HookEvent
 
 class ActionPrompt(ActionExecutor):
-    """提示處理動作執行器"""
+    """Prompt Processing Action Executor"""
     
     def get_action_type(self) -> str:
         return "action.prompt"
     
     def execute(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """執行提示處理動作"""
+        """ExecutePrompt processingAction"""
         start_time = datetime.now()
         
         try:
@@ -33,7 +33,7 @@ class ActionPrompt(ActionExecutor):
                     action_id="action.prompt",
                     success=False,
                     execution_time=(datetime.now() - start_time).total_seconds(),
-                    error=f"未知操作: {operation}"
+                    error=f"Unknown operation: {operation}"
                 )
             
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -54,7 +54,7 @@ class ActionPrompt(ActionExecutor):
             )
     
     def _analyze_prompt(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """分析提示內容"""
+        """Analyze提示Content"""
         prompt = event.user_prompt or ""
         
         analysis = {
@@ -91,7 +91,7 @@ class ActionPrompt(ActionExecutor):
         return enhancements
     
     def _validate_prompt(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """驗證提示"""
+        """Validate提示"""
         prompt = event.user_prompt or ""
         
         validation = {
@@ -101,7 +101,7 @@ class ActionPrompt(ActionExecutor):
             'score': 0
         }
         
-        # 檢查基本問題
+        # Check基本問題
         if len(prompt) < 10:
             validation['issues'].append("提示過短，可能不夠具體")
             validation['is_valid'] = False
@@ -109,7 +109,7 @@ class ActionPrompt(ActionExecutor):
         if len(prompt) > 1000:
             validation['warnings'].append("提示過長，建議簡化")
         
-        # 檢查模糊用詞
+        # Check模糊用詞
         vague_words = ['這個', '那個', '某些', '一些', '改一下', '修一下']
         if any(word in prompt for word in vague_words):
             validation['warnings'].append("包含模糊用詞，建議更具體")
@@ -134,7 +134,7 @@ class ActionPrompt(ActionExecutor):
         return intent_analysis
     
     def _contains_code_patterns(self, prompt: str) -> bool:
-        """檢查是否包含代碼模式"""
+        """Check是否包含代碼模式"""
         code_patterns = [
             '```', '`', 'function', 'class', 'def ', 'import ', 'const ', 'let ', 'var ',
             '{', '}', '()', '=>', 'return', 'if', 'for', 'while'
@@ -173,14 +173,14 @@ class ActionPrompt(ActionExecutor):
         prompt_lower = prompt.lower()
         
         intent_patterns = {
-            'create': ['建立', 'create', '新增', 'add', '寫', 'write', '製作', 'make'],
-            'modify': ['修改', 'modify', '更新', 'update', '編輯', 'edit', '改', 'change'],
-            'delete': ['刪除', 'delete', '移除', 'remove', '清除', 'clear'],
-            'query': ['查詢', 'query', '搜索', 'search', '找', 'find', '獲取', 'get'],
-            'analyze': ['分析', 'analyze', '檢查', 'check', '驗證', 'validate', '測試', 'test'],
+            'create': ['Create', 'create', '新增', 'add', '寫', 'write', '製作', 'make'],
+            'modify': ['修改', 'modify', 'Update', 'update', '編輯', 'edit', '改', 'change'],
+            'delete': ['Delete', 'delete', '移除', 'remove', '清除', 'clear'],
+            'query': ['Query', 'query', '搜索', 'search', '找', 'find', '獲取', 'get'],
+            'analyze': ['Analyze', 'analyze', 'Check', 'check', 'Validate', 'validate', 'Test', 'test'],
             'explain': ['解釋', 'explain', '說明', 'describe', '介紹', 'introduce'],
             'fix': ['修復', 'fix', '解決', 'solve', '調試', 'debug', '除錯'],
-            'optimize': ['優化', 'optimize', '改善', 'improve', '提升', 'enhance']
+            'optimize': ['Optimize', 'optimize', '改善', 'improve', '提升', 'enhance']
         }
         
         for intent, patterns in intent_patterns.items():
@@ -194,10 +194,10 @@ class ActionPrompt(ActionExecutor):
         prompt_lower = prompt.lower()
         secondary_intents = []
         
-        if any(word in prompt_lower for word in ['測試', 'test', '驗證', 'validate']):
+        if any(word in prompt_lower for word in ['Test', 'test', 'Validate', 'validate']):
             secondary_intents.append('test')
         
-        if any(word in prompt_lower for word in ['記錄', 'record', '保存', 'save']):
+        if any(word in prompt_lower for word in ['Record', 'record', 'Save', 'save']):
             secondary_intents.append('record')
         
         if any(word in prompt_lower for word in ['分享', 'share', '發布', 'publish']):
@@ -228,16 +228,16 @@ class ActionPrompt(ActionExecutor):
         return min(confidence, 1.0)
     
     def _extract_action_verbs(self, prompt: str) -> list:
-        """提取動作動詞"""
+        """提取Action動詞"""
         action_verbs = [
-            '建立', '創建', '新增', '添加', '寫', '製作',
-            '修改', '更新', '編輯', '改變', '調整',
-            '刪除', '移除', '清除', '去除',
-            '查詢', '搜索', '找', '獲取', '讀取',
-            '分析', '檢查', '驗證', '測試', '評估',
+            'Create', 'Create', '新增', '添加', '寫', '製作',
+            '修改', 'Update', '編輯', '改變', '調整',
+            'Delete', '移除', '清除', '去除',
+            'Query', '搜索', '找', '獲取', '讀取',
+            'Analyze', 'Check', 'Validate', 'Test', 'Evaluate',
             '解釋', '說明', '描述', '介紹',
             '修復', '解決', '調試', '除錯',
-            '優化', '改善', '提升', '增強'
+            'Optimize', '改善', '提升', '增強'
         ]
         
         prompt_lower = prompt.lower()
@@ -259,7 +259,7 @@ class ActionPrompt(ActionExecutor):
         return found_objects
     
     def _generate_clarity_suggestions(self, prompt: str) -> list:
-        """生成清晰度建議"""
+        """Generate清晰度建議"""
         suggestions = []
         
         if len(prompt.split()) < 5:
@@ -268,17 +268,17 @@ class ActionPrompt(ActionExecutor):
         if '這個' in prompt or '那個' in prompt:
             suggestions.append("避免使用模糊指代詞，請具體說明")
         
-        if not any(verb in prompt.lower() for verb in ['建立', '修改', '刪除', '查詢']):
-            suggestions.append("明確說明要執行什麼動作")
+        if not any(verb in prompt.lower() for verb in ['Create', '修改', 'Delete', 'Query']):
+            suggestions.append("明確說明要Execute什麼Action")
         
         return suggestions
     
     def _generate_completeness_suggestions(self, prompt: str) -> list:
-        """生成完整性建議"""
+        """Generate完整性建議"""
         suggestions = []
         
-        if '檔案' in prompt and not any(ext in prompt for ext in ['.py', '.js', '.json', '.txt']):
-            suggestions.append("建議指定檔案類型或副檔名")
+        if 'File' in prompt and not any(ext in prompt for ext in ['.py', '.js', '.json', '.txt']):
+            suggestions.append("建議指定FileType或副檔名")
         
         if '修改' in prompt and '原因' not in prompt and '為什麼' not in prompt:
             suggestions.append("建議說明修改的原因或目的")
@@ -286,15 +286,15 @@ class ActionPrompt(ActionExecutor):
         return suggestions
     
     def _generate_technical_suggestions(self, prompt: str) -> list:
-        """生成技術建議"""
+        """Generate技術建議"""
         suggestions = []
         
         if self._contains_code_patterns(prompt):
-            suggestions.append("包含代碼片段，建議使用適當的格式化")
+            suggestions.append("包含代碼片段，建議使用適當的Format化")
         
         technical_count = len(self._extract_technical_keywords(prompt))
         if technical_count > 5:
-            suggestions.append("技術詞彙較多，建議分步驟執行")
+            suggestions.append("技術詞彙較多，建議分步驟Execute")
         
         return suggestions
     
@@ -302,7 +302,7 @@ class ActionPrompt(ActionExecutor):
         """計算提示分數 (0-100)"""
         score = 100
         
-        # 根據問題和警告扣分
+        # 根據問題和Warning扣分
         score -= len(validation['issues']) * 20
         score -= len(validation['warnings']) * 5
         

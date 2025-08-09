@@ -22,30 +22,30 @@ class Rule:
     id: str
     name: str
     conditions: List[RuleCondition]
-    actions: List[str]                 # 要執行的動作ID列表
+    actions: List[str]                 # 要Execute的ActionID列表
     
     # 規則屬性
     priority: int = 100
     enabled: bool = True
-    event_types: List[str] = field(default_factory=list)  # 適用的事件類型
+    event_types: List[str] = field(default_factory=list)  # 適用的Event type
     
-    # 執行控制
-    block_on_fail: bool = False        # 失敗時是否阻止後續處理
-    async_execution: bool = False      # 是否異步執行
-    cooldown_seconds: int = 0          # 冷卻時間
+    # Execute控制
+    block_on_fail: bool = False        # Failed時是否阻止後續Process
+    async_execution: bool = False      # 是否異步Execute
+    cooldown_seconds: int = 0          # 冷卻Time
     
     # 規則統計
     triggered_count: int = 0
     last_triggered: Optional[datetime] = None
     
     # 條件限制
-    file_patterns: List[str] = field(default_factory=list)  # 文件路徑模式
+    file_patterns: List[str] = field(default_factory=list)  # File path模式
     exclude_patterns: List[str] = field(default_factory=list)
     
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 class RuleEngine:
-    """規則引擎 - 負責規則的載入、匹配和執行決策"""
+    """Rule Engine - 負責規則的Load、匹配和Execute決策"""
     
     def __init__(self, config_path: Optional[str] = None):
         self.rules: Dict[str, Rule] = {}
@@ -73,7 +73,7 @@ class RuleEngine:
         })
     
     def load_rules_from_config(self, config_path: str):
-        """從配置文件載入規則"""
+        """從ConfigurationFileLoad規則"""
         import json
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
@@ -84,10 +84,10 @@ class RuleEngine:
                 self.rules[rule.id] = rule
                 
         except Exception as e:
-            print(f"載入規則配置失敗: {e}")
+            print(f"Load規則ConfigurationFailed: {e}")
     
     def _parse_rule_config(self, rule_data: Dict[str, Any]) -> Rule:
-        """解析規則配置"""
+        """解析規則Configuration"""
         conditions = []
         for cond_data in rule_data.get('conditions', []):
             condition = RuleCondition(
@@ -135,13 +135,13 @@ class RuleEngine:
             self.rules[rule_id].enabled = False
     
     def match_rules(self, event: HookEvent) -> List[Rule]:
-        """匹配適用於事件的規則"""
+        """匹配適用於Event的規則"""
         matched_rules = []
         
         for rule in self.rules.values():
             if self._should_rule_apply(rule, event):
                 if self._evaluate_rule_conditions(rule, event):
-                    # 更新規則統計
+                    # Update規則統計
                     rule.triggered_count += 1
                     rule.last_triggered = datetime.now()
                     matched_rules.append(rule)
@@ -151,22 +151,22 @@ class RuleEngine:
         return matched_rules
     
     def _should_rule_apply(self, rule: Rule, event: HookEvent) -> bool:
-        """判斷規則是否應該應用於事件"""
-        # 檢查規則是否啟用
+        """判斷規則是否應該應用於Event"""
+        # Check規則是否啟用
         if not rule.enabled:
             return False
         
-        # 檢查事件類型
+        # CheckEvent type
         if rule.event_types and event.event_type not in rule.event_types:
             return False
         
-        # 檢查冷卻時間
+        # Check冷卻Time
         if rule.cooldown_seconds > 0 and rule.last_triggered:
             time_since_last = (datetime.now() - rule.last_triggered).total_seconds()
             if time_since_last < rule.cooldown_seconds:
                 return False
         
-        # 檢查文件路徑模式
+        # CheckFile path模式
         if rule.file_patterns and event.file_paths:
             file_match = False
             for file_path in event.file_paths:
@@ -176,7 +176,7 @@ class RuleEngine:
             if not file_match:
                 return False
         
-        # 檢查排除模式
+        # Check排除模式
         if rule.exclude_patterns and event.file_paths:
             for file_path in event.file_paths:
                 if any(self._match_pattern(file_path, pattern) for pattern in rule.exclude_patterns):
@@ -185,7 +185,7 @@ class RuleEngine:
         return True
     
     def _match_pattern(self, text: str, pattern: str) -> bool:
-        """匹配路徑模式"""
+        """匹配Path模式"""
         try:
             # 支持 glob 風格的模式匹配
             import fnmatch
@@ -194,7 +194,7 @@ class RuleEngine:
             return pattern in text
     
     def _evaluate_rule_conditions(self, rule: Rule, event: HookEvent) -> bool:
-        """評估規則條件"""
+        """Evaluate規則條件"""
         if not rule.conditions:
             return True
         
@@ -206,7 +206,7 @@ class RuleEngine:
         return True
     
     def _evaluate_single_condition(self, condition: RuleCondition, event: HookEvent) -> bool:
-        """評估單個條件"""
+        """Evaluate單個條件"""
         try:
             if condition.condition_type == "simple":
                 return self._evaluate_simple_condition(condition.expression, event)
@@ -219,12 +219,12 @@ class RuleEngine:
             else:
                 return False
         except Exception as e:
-            print(f"條件評估失敗: {condition.expression}, 錯誤: {e}")
+            print(f"條件EvaluateFailed: {condition.expression}, Error: {e}")
             return False
     
     def _evaluate_simple_condition(self, expression: str, event: HookEvent) -> bool:
-        """評估簡單條件"""
-        # 建立評估上下文
+        """Evaluate簡單條件"""
+        # CreateEvaluate上下文
         context = {
             'event_type': event.event_type,
             'tool_name': event.tool_name or '',
@@ -238,7 +238,7 @@ class RuleEngine:
         # 替換內建函數調用
         for func_name, func in self.custom_functions.items():
             if f'{func_name}(' in expression:
-                # 簡化的函數調用處理
+                # 簡化的函數調用Process
                 pattern = rf'{func_name}\(([^)]*)\)'
                 matches = re.findall(pattern, expression)
                 for match in matches:
@@ -249,9 +249,9 @@ class RuleEngine:
                     except:
                         return False
         
-        # 評估表達式
+        # Evaluate表達式
         try:
-            # 安全的表達式評估 (限制可用的命名空間)
+            # 安全的表達式Evaluate (限制可用的命名空間)
             allowed_names = {
                 'event_type': context['event_type'],
                 'tool_name': context['tool_name'],
@@ -272,7 +272,7 @@ class RuleEngine:
             return False
     
     def _evaluate_regex_condition(self, expression: str, event: HookEvent) -> bool:
-        """評估正則表達式條件"""
+        """Evaluate正則表達式條件"""
         # 從 metadata 中提取目標文本
         target_text = ""
         if event.user_prompt:
@@ -283,8 +283,8 @@ class RuleEngine:
         return bool(re.search(expression, target_text, re.IGNORECASE))
     
     def _evaluate_function_condition(self, expression: str, event: HookEvent) -> bool:
-        """評估函數條件"""
-        # 函數條件格式: function_name(args)
+        """Evaluate函數條件"""
+        # 函數條件Format: function_name(args)
         match = re.match(r'(\w+)\((.*)\)', expression)
         if not match:
             return False
@@ -297,26 +297,26 @@ class RuleEngine:
         return self.custom_functions[func_name](event, *args)
     
     def _evaluate_composite_condition(self, expression: str, event: HookEvent) -> bool:
-        """評估複合條件 (支持 AND, OR, NOT)"""
+        """Evaluate複合條件 (支持 AND, OR, NOT)"""
         # 簡化的複合條件解析
         expression = expression.replace(' AND ', ' and ').replace(' OR ', ' or ').replace(' NOT ', ' not ')
         
-        # 遞歸評估子條件
+        # 遞歸Evaluate子條件
         return self._evaluate_simple_condition(expression, event)
     
     # 內建條件函數
     def _func_contains(self, event: HookEvent, keyword: str) -> bool:
-        """檢查是否包含關鍵字"""
+        """Check是否包含關鍵字"""
         text = f"{event.user_prompt or ''} {event.content or ''}".lower()
         return keyword.lower() in text
     
     def _func_matches(self, event: HookEvent, pattern: str) -> bool:
-        """檢查是否匹配正則表達式"""
+        """Check是否匹配正則表達式"""
         text = f"{event.user_prompt or ''} {event.content or ''}"
         return bool(re.search(pattern, text, re.IGNORECASE))
     
     def _func_file_extension(self, event: HookEvent, *extensions: str) -> bool:
-        """檢查文件副檔名"""
+        """CheckFile副檔名"""
         for file_path in event.file_paths:
             ext = Path(file_path).suffix.lower()
             if ext in extensions:
@@ -324,7 +324,7 @@ class RuleEngine:
         return False
     
     def _func_file_size_gt(self, event: HookEvent, size_str: str) -> bool:
-        """檢查文件大小大於指定值"""
+        """CheckFileSize大於指定值"""
         try:
             size_limit = int(size_str)
             for file_path in event.file_paths:
@@ -335,7 +335,7 @@ class RuleEngine:
             return False
     
     def _func_code_complexity(self, event: HookEvent, threshold_str: str) -> bool:
-        """檢查代碼複雜度"""
+        """Check代碼複雜度"""
         try:
             threshold = float(threshold_str)
             complexity = event.metadata.get('estimated_complexity', 'simple')
@@ -345,17 +345,17 @@ class RuleEngine:
             return False
     
     def _func_has_keyword(self, event: HookEvent, keyword: str) -> bool:
-        """檢查是否包含特定關鍵字"""
+        """Check是否包含特定關鍵字"""
         keywords = event.metadata.get('contains_keywords', [])
         return keyword in keywords
     
     def _func_is_test_file(self, event: HookEvent) -> bool:
-        """檢查是否為測試文件"""
+        """Check是否為TestFile"""
         test_patterns = ['/test/', '/tests/', '.test.', '.spec.', '_test.', '_spec.']
         return any(pattern in fp.lower() for fp in event.file_paths for pattern in test_patterns)
     
     def _func_session_count(self, event: HookEvent, event_type: str, count_str: str) -> bool:
-        """檢查會話中特定事件的計數"""
+        """CheckSession中特定Event的計數"""
         try:
             target_count = int(count_str)
             current_count = self.session_state.get(f'count_{event_type}', 0)
@@ -364,7 +364,7 @@ class RuleEngine:
             return False
     
     def _func_recent_pattern(self, event: HookEvent, pattern: str, count_str: str) -> bool:
-        """檢查最近事件中的模式"""
+        """Check最近Event中的模式"""
         try:
             count = int(count_str)
             recent_events = self.session_state.get('recent_events', [])[-count:]
@@ -373,14 +373,14 @@ class RuleEngine:
             return False
     
     def _func_time_since_last(self, event: HookEvent, event_type: str, seconds_str: str) -> bool:
-        """檢查距離上次事件的時間"""
+        """Check距離上次Event的Time"""
         try:
             seconds_threshold = int(seconds_str)
             last_time_key = f'last_{event_type}_time'
             last_time = self.session_state.get(last_time_key)
             
             if last_time is None:
-                return True  # 沒有記錄時返回 True
+                return True  # 沒有Record時返回 True
             
             time_diff = (datetime.now() - last_time).total_seconds()
             return time_diff >= seconds_threshold
@@ -388,11 +388,11 @@ class RuleEngine:
             return False
     
     def update_session_state(self, key: str, value: Any):
-        """更新會話狀態"""
+        """UpdateSessionStatus"""
         self.session_state[key] = value
     
     def get_rule_statistics(self) -> Dict[str, Any]:
-        """獲取規則統計信息"""
+        """獲取規則統計Information"""
         stats = {}
         for rule_id, rule in self.rules.items():
             stats[rule_id] = {

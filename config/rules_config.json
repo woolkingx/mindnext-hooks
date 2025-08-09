@@ -1,11 +1,11 @@
 {
   "version": "1.0.0",
-  "description": "MindNext Hooks 規則配置 - 支援各種觸發條件和動作",
+  "description": "MindNext Hooks 規則Configuration - 支援各種觸發條件和Action",
   
   "rules": [
     {
       "id": "quality_check_on_code_edit",
-      "name": "代碼編輯後自動品質檢查",
+      "name": "代碼編輯後自動Quality check",
       "enabled": true,
       "priority": 100,
       "event_types": ["PostToolUse"],
@@ -18,14 +18,14 @@
       ],
       "actions": [
         "action.quality/operation=check",
-        "action.notification/type=console&severity=info&message=代碼品質檢查完成"
+        "action.notification/type=console&severity=info&message=代碼Quality checkComplete"
       ],
       "cooldown_seconds": 30
     },
     
     {
       "id": "memory_record_on_completion",
-      "name": "完成操作後記錄到知識圖譜",
+      "name": "CompleteOperation後Record到Knowledge Graph",
       "enabled": true,
       "priority": 90,
       "event_types": ["PostToolUse"],
@@ -42,7 +42,7 @@
     
     {
       "id": "ai_analysis_for_complex_operations",
-      "name": "複雜操作觸發 AI 分析",
+      "name": "複雜Operation觸發 AI Analyze",
       "enabled": true,
       "priority": 80,
       "event_types": ["PostToolUse"],
@@ -55,13 +55,13 @@
       "actions": [
         "action.ai/operation=analyze_code",
         "action.analysis/type=impact",
-        "action.notification/type=toast&severity=info&message=複雜操作分析完成"
+        "action.notification/type=toast&severity=info&message=複雜OperationAnalyzeComplete"
       ]
     },
     
     {
       "id": "security_scan_on_sensitive_files",
-      "name": "敏感文件修改時安全掃描",
+      "name": "敏感File修改時安全掃描",
       "enabled": true,
       "priority": 95,
       "event_types": ["PostToolUse"],
@@ -74,7 +74,7 @@
       ],
       "actions": [
         "action.quality/operation=security_scan",
-        "action.notification/type=system&title=安全提醒&message=已對敏感文件進行安全掃描"
+        "action.notification/type=system&title=安全Reminder&message=已對敏感File進行安全掃描"
       ],
       "block_on_fail": true
     },
@@ -94,13 +94,13 @@
       "actions": [
         "action.prompt/operation=analyze",
         "action.prompt/operation=enhance&type=clarity",
-        "action.notification/type=console&severity=warning&message=檢測到模糊提示，建議更具體"
+        "action.notification/type=console&severity=warning&message=Detection到模糊提示，建議更具體"
       ]
     },
     
     {
       "id": "backup_on_multiple_file_changes",
-      "name": "多文件修改時自動備份",
+      "name": "多File修改時自動備份",
       "enabled": true,
       "priority": 90,
       "event_types": ["PostToolUse"],
@@ -112,13 +112,13 @@
       ],
       "actions": [
         "action.utility/operation=buffer.push&buffer_id=backup&data={\"files\": file_paths, \"timestamp\": event.timestamp.isoformat()}",
-        "action.notification/type=console&severity=info&message=多文件操作已備份"
+        "action.notification/type=console&severity=info&message=多FileOperation已備份"
       ]
     },
     
     {
       "id": "rate_limit_rapid_operations",
-      "name": "快速操作頻率限制",
+      "name": "快速OperationRate limit",
       "enabled": true,
       "priority": 100,
       "event_types": ["PostToolUse"],
@@ -135,7 +135,7 @@
     
     {
       "id": "weekend_work_reminder",
-      "name": "週末工作提醒",
+      "name": "週末工作Reminder",
       "enabled": true,
       "priority": 50,
       "event_types": ["UserPromptSubmit", "PostToolUse"],
@@ -153,7 +153,7 @@
     
     {
       "id": "test_file_creation_reminder",
-      "name": "創建代碼文件時提醒添加測試",
+      "name": "Create代碼File時Reminder添加Test",
       "enabled": true,
       "priority": 70,
       "event_types": ["PostToolUse"],
@@ -166,13 +166,13 @@
         }
       ],
       "actions": [
-        "action.notification/type=toast&severity=info&message=💡 建議為新代碼添加測試&duration=8000"
+        "action.notification/type=toast&severity=info&message=💡 建議為新代碼添加Test&duration=8000"
       ]
     },
     
     {
       "id": "dependency_check_on_package_file",
-      "name": "包文件修改時依賴檢查",
+      "name": "包File修改時Dependency check",
       "enabled": true,
       "priority": 85,
       "event_types": ["PostToolUse"],
@@ -185,13 +185,13 @@
       ],
       "actions": [
         "action.quality/operation=dependency_check",
-        "action.notification/type=system&title=依賴檢查&message=包文件已更新，建議檢查依賴"
+        "action.notification/type=system&title=Dependency check&message=包File已Update，建議Check依賴"
       ]
     },
     
     {
       "id": "performance_monitoring",
-      "name": "性能監控和優化建議",
+      "name": "性能監控和Optimize建議",
       "enabled": true,
       "priority": 60,
       "event_types": ["PostToolUse"],
@@ -210,7 +210,7 @@
     
     {
       "id": "similarity_check_on_new_code",
-      "name": "新代碼相似性檢查",
+      "name": "新代碼Similarity check",
       "enabled": true,
       "priority": 75,
       "event_types": ["PostToolUse"],
@@ -228,7 +228,7 @@
     
     {
       "id": "work_session_analysis",
-      "name": "工作會話分析",
+      "name": "工作SessionAnalyze",
       "enabled": true,
       "priority": 40,
       "event_types": ["PostToolUse"],
@@ -241,13 +241,13 @@
       "actions": [
         "action.analysis/type=usage",
         "action.memory/operation=summarize",
-        "action.notification/type=console&severity=success&message=📊 工作會話分析已更新"
+        "action.notification/type=console&severity=success&message=📊 工作SessionAnalyze已Update"
       ]
     },
     
     {
       "id": "error_circuit_breaker",
-      "name": "錯誤斷路器",
+      "name": "ErrorCircuit breaker",
       "enabled": true,
       "priority": 100,
       "event_types": ["PostToolUse"],
@@ -264,7 +264,7 @@
     
     {
       "id": "ai_keyword_extraction",
-      "name": "用戶提示關鍵字提取",
+      "name": "User prompt關鍵字提取",
       "enabled": true,
       "priority": 65,
       "event_types": ["UserPromptSubmit"],
@@ -299,7 +299,7 @@
     
     {
       "id": "health_check_periodic",
-      "name": "定期健康檢查",
+      "name": "定期Health check",
       "enabled": true,
       "priority": 20,
       "event_types": ["PostToolUse"],
@@ -330,13 +330,13 @@
       "actions": [
         "action.memory/operation=mindnext_record",
         "action.ai/operation=summarize&content={content}",
-        "action.notification/type=toast&severity=success&message=已整合到 MindNext 知識圖譜"
+        "action.notification/type=toast&severity=success&message=已整合到 MindNext Knowledge Graph"
       ]
     },
     
     {
       "id": "cleanup_on_session_end",
-      "name": "會話結束時清理",
+      "name": "Session結束時清理",
       "enabled": true,
       "priority": 10,
       "event_types": ["SessionEnd"],

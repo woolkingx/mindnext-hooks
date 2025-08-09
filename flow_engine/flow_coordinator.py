@@ -267,7 +267,7 @@ class FlowCoordinator:
         self.performance_metrics['rules_triggered'] += rules_count
         self.performance_metrics['actions_executed'] += actions_count
         
-        # 更新平均處理時間
+        # Update平均Processing time
         total_events = self.performance_metrics['total_events']
         current_avg = self.performance_metrics['average_processing_time']
         
@@ -275,7 +275,7 @@ class FlowCoordinator:
         self.performance_metrics['average_processing_time'] = new_avg
     
     def get_system_status(self) -> Dict[str, Any]:
-        """獲取系統狀態"""
+        """獲取SystemStatus"""
         return {
             'coordinator_status': 'operational',
             'performance_metrics': self.performance_metrics,
@@ -307,7 +307,7 @@ class FlowCoordinator:
         return self.rule_engine.get_rule_statistics()
     
     def get_action_statistics(self) -> Dict[str, Any]:
-        """獲取動作統計"""
+        """獲取Action統計"""
         return self.action_executor.get_execution_statistics()
     
     def enable_rule(self, rule_id: str) -> bool:
@@ -321,18 +321,18 @@ class FlowCoordinator:
         return rule_id in self.rule_engine.rules and not self.rule_engine.rules[rule_id].enabled
     
     def reload_configuration(self) -> Dict[str, Any]:
-        """重新載入配置"""
+        """重新LoadConfiguration"""
         try:
-            # 重新載入規則配置
+            # 重新Load規則Configuration
             rules_config_path = str(self.config_dir / "rules_config.json")
             self.rule_engine.load_rules_from_config(rules_config_path)
             
-            # 重新載入動作管道配置
+            # 重新LoadAction管道Configuration
             self._load_action_pipelines()
             
             return {
                 'success': True,
-                'message': '配置重新載入成功',
+                'message': 'Configuration重新LoadSuccess',
                 'rules_loaded': len(self.rule_engine.rules),
                 'pipelines_loaded': len(self.action_executor.pipelines)
             }
@@ -344,7 +344,7 @@ class FlowCoordinator:
             }
     
     def export_execution_report(self, format: str = 'json') -> Dict[str, Any]:
-        """導出執行報告"""
+        """導出Execute報告"""
         report = {
             'generated_at': datetime.now().isoformat(),
             'system_status': self.get_system_status(),
@@ -366,7 +366,7 @@ class FlowCoordinator:
         }
         
         if format == 'json':
-            # 保存到文件
+            # Save到File
             report_dir = Path("/root/Dev/mindnext/record")
             report_dir.mkdir(exist_ok=True)
             
@@ -385,10 +385,10 @@ class FlowCoordinator:
         return report
     
     async def test_flow(self, test_event: Dict[str, Any]) -> Dict[str, Any]:
-        """測試完整流程"""
-        print("🧪 開始測試三層流程...")
+        """Test完整流程"""
+        print("🧪 開始Test三層流程...")
         
-        # 模擬事件數據
+        # 模擬EventData
         test_data = {
             'tool_name': test_event.get('tool_name', 'Write'),
             'tool_input': {
@@ -400,12 +400,12 @@ class FlowCoordinator:
             }
         }
         
-        # 執行完整流程
+        # Execute完整流程
         result = await self.process_hook_event('PostToolUse', test_data)
         
-        print(f"✅ 測試完成: {result['success']}")
-        print(f"📊 處理時間: {result['processing_time']:.3f}s")
+        print(f"✅ TestComplete: {result['success']}")
+        print(f"📊 Processing time: {result['processing_time']:.3f}s")
         print(f"🎯 匹配規則: {len(result['rules_matched'])}")
-        print(f"⚡ 執行動作: {result['actions_executed']}")
+        print(f"⚡ Execute action: {result['actions_executed']}")
         
         return result

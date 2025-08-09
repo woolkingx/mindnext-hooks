@@ -1,5 +1,5 @@
 """
-ActionUtility - 工具動作執行器 (包含核心組件: Buffer/Cache/AISDK)
+ActionUtility - Utility Action Executor (包含核心Component: Buffer/Cache/AISDK)
 """
 
 from typing import Dict, Any, List, Optional
@@ -15,11 +15,11 @@ from .action_base import ActionExecutor, ActionResult
 from ..event_layer import HookEvent
 
 class ActionUtility(ActionExecutor):
-    """工具動作執行器 - 包含核心組件功能"""
+    """Utility Action Executor - 包含核心ComponentFunction"""
     
     def __init__(self):
         super().__init__()
-        # 核心組件初始化
+        # 核心ComponentInitialize
         self.buffer_component = BufferComponent()
         self.cache_component = CacheComponent()
         self.aisdk_component = AISDKComponent()
@@ -28,13 +28,13 @@ class ActionUtility(ActionExecutor):
         return "action.utility"
     
     def execute(self, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> ActionResult:
-        """執行工具動作"""
+        """Execute toolAction"""
         start_time = datetime.now()
         
         try:
             operation = parameters.get('operation', 'log')
             
-            # 基本工具操作
+            # 基本ToolOperation
             if operation == 'log':
                 result = self._log_operation(event, parameters)
             elif operation == 'delay':
@@ -44,7 +44,7 @@ class ActionUtility(ActionExecutor):
             elif operation == 'uuid':
                 result = self._uuid_operation(event, parameters)
             
-            # 核心組件操作
+            # 核心ComponentOperation
             elif operation.startswith('buffer.'):
                 result = self._buffer_operations(operation, event, parameters, context)
             elif operation.startswith('cache.'):
@@ -52,7 +52,7 @@ class ActionUtility(ActionExecutor):
             elif operation.startswith('aisdk.'):
                 result = self._aisdk_operations(operation, event, parameters, context)
             
-            # 系統操作
+            # SystemOperation
             elif operation == 'system_info':
                 result = self._system_info_operation(event, parameters)
             elif operation == 'health_check':
@@ -65,7 +65,7 @@ class ActionUtility(ActionExecutor):
                     action_id="action.utility",
                     success=False,
                     execution_time=(datetime.now() - start_time).total_seconds(),
-                    error=f"未知操作: {operation}"
+                    error=f"Unknown operation: {operation}"
                 )
             
             execution_time = (datetime.now() - start_time).total_seconds()
@@ -86,7 +86,7 @@ class ActionUtility(ActionExecutor):
             )
     
     def _buffer_operations(self, operation: str, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """Buffer 組件操作"""
+        """Buffer ComponentOperation"""
         op_name = operation.split('.')[1]
         
         if op_name == 'push':
@@ -104,16 +104,16 @@ class ActionUtility(ActionExecutor):
         elif op_name == 'flush':
             return self.buffer_component.flush(parameters.get('buffer_id', 'default'), parameters.get('target'))
         else:
-            return {'error': f'未知 Buffer 操作: {op_name}'}
+            return {'error': f'未知 Buffer Operation: {op_name}'}
     
     def _cache_operations(self, operation: str, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """Cache 組件操作"""
+        """Cache ComponentOperation"""
         op_name = operation.split('.')[1]
         
         if op_name == 'set':
             key = parameters.get('key')
             value = parameters.get('value')
-            ttl = parameters.get('ttl', 3600)  # 默認1小時
+            ttl = parameters.get('ttl', 3600)  # Default1小時
             return self.cache_component.set(key, value, ttl)
         elif op_name == 'get':
             key = parameters.get('key')
@@ -131,10 +131,10 @@ class ActionUtility(ActionExecutor):
         elif op_name == 'cleanup':
             return self.cache_component.cleanup_expired()
         else:
-            return {'error': f'未知 Cache 操作: {op_name}'}
+            return {'error': f'未知 Cache Operation: {op_name}'}
     
     def _aisdk_operations(self, operation: str, event: HookEvent, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        """AI SDK 組件操作"""
+        """AI SDK ComponentOperation"""
         op_name = operation.split('.')[1]
         
         if op_name == 'analyze':
@@ -154,20 +154,20 @@ class ActionUtility(ActionExecutor):
         elif op_name == 'stats':
             return self.aisdk_component.get_stats()
         else:
-            return {'error': f'未知 AI SDK 操作: {op_name}'}
+            return {'error': f'未知 AI SDK Operation: {op_name}'}
     
     def _log_operation(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """日誌操作"""
+        """日誌Operation"""
         message = parameters.get('message', f'Hook Event: {event.event_type}')
         level = parameters.get('level', 'info')
         
-        # 格式化日誌
+        # Format化日誌
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         log_entry = f"[{timestamp}] [{level.upper()}] {message}"
         
         print(log_entry)
         
-        # 可選：寫入日誌文件
+        # 可選：寫入日誌File
         if parameters.get('write_file', False):
             log_file = parameters.get('log_file', '/root/Dev/mindnext/logs/hooks.log')
             Path(log_file).parent.mkdir(exist_ok=True)
@@ -183,7 +183,7 @@ class ActionUtility(ActionExecutor):
         }
     
     def _delay_operation(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """延遲操作"""
+        """延遲Operation"""
         delay_seconds = parameters.get('seconds', 1)
         message = parameters.get('message', f'延遲 {delay_seconds} 秒')
         
@@ -199,7 +199,7 @@ class ActionUtility(ActionExecutor):
         }
     
     def _timestamp_operation(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """時間戳操作"""
+        """Time戳Operation"""
         format_type = parameters.get('format', 'iso')
         timezone = parameters.get('timezone', 'local')
         
@@ -223,14 +223,14 @@ class ActionUtility(ActionExecutor):
         }
     
     def _uuid_operation(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """UUID 生成操作"""
+        """UUID GenerateOperation"""
         import uuid
         
         uuid_type = parameters.get('type', 'uuid4')
         count = parameters.get('count', 1)
         
         uuids = []
-        for _ in range(min(count, 100)):  # 限制最多生成100個
+        for _ in range(min(count, 100)):  # 限制最多Generate100個
             if uuid_type == 'uuid1':
                 new_uuid = str(uuid.uuid1())
             elif uuid_type == 'uuid4':
@@ -247,7 +247,7 @@ class ActionUtility(ActionExecutor):
         }
     
     def _system_info_operation(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """系統信息操作"""
+        """SystemInformationOperation"""
         import platform
         import psutil
         
@@ -283,7 +283,7 @@ class ActionUtility(ActionExecutor):
         }
     
     def _health_check_operation(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """健康檢查操作"""
+        """Health checkOperation"""
         checks = {
             'buffer_component': self.buffer_component.health_check(),
             'cache_component': self.cache_component.health_check(),
@@ -300,10 +300,10 @@ class ActionUtility(ActionExecutor):
         }
     
     def _cleanup_operation(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """清理操作"""
+        """清理Operation"""
         cleanup_results = {}
         
-        # 清理過期緩存
+        # 清理過期Cache
         cache_cleanup = self.cache_component.cleanup_expired()
         cleanup_results['cache'] = cache_cleanup
         
@@ -323,7 +323,7 @@ class ActionUtility(ActionExecutor):
 
 
 class BufferComponent:
-    """Buffer 組件 - 提供數據緩衝功能"""
+    """Buffer Component - 提供Data緩衝Function"""
     
     def __init__(self):
         self.buffers: Dict[str, deque] = {}
@@ -331,7 +331,7 @@ class BufferComponent:
         self._lock = threading.RLock()
     
     def push(self, data: Any, buffer_id: str = 'default') -> Dict[str, Any]:
-        """推入數據到緩衝區"""
+        """推入Data到緩衝區"""
         with self._lock:
             if buffer_id not in self.buffers:
                 self.buffers[buffer_id] = deque()
@@ -340,11 +340,11 @@ class BufferComponent:
             buffer = self.buffers[buffer_id]
             config = self.buffer_configs[buffer_id]
             
-            # 檢查最大大小限制
+            # Check最大Size限制
             if len(buffer) >= config['max_size']:
-                buffer.popleft()  # 移除最舊的數據
+                buffer.popleft()  # 移除最舊的Data
             
-            # 添加時間戳
+            # 添加Time戳
             item = {
                 'data': data,
                 'timestamp': datetime.now().isoformat(),
@@ -361,7 +361,7 @@ class BufferComponent:
             }
     
     def pop(self, buffer_id: str = 'default') -> Dict[str, Any]:
-        """從緩衝區彈出數據"""
+        """從緩衝區彈出Data"""
         with self._lock:
             if buffer_id not in self.buffers or not self.buffers[buffer_id]:
                 return {'success': False, 'error': 'Buffer empty or not found'}
@@ -376,7 +376,7 @@ class BufferComponent:
             }
     
     def peek(self, buffer_id: str = 'default') -> Dict[str, Any]:
-        """查看緩衝區頂部數據（不移除）"""
+        """查看緩衝區頂部Data（不移除）"""
         with self._lock:
             if buffer_id not in self.buffers or not self.buffers[buffer_id]:
                 return {'success': False, 'error': 'Buffer empty or not found'}
@@ -391,7 +391,7 @@ class BufferComponent:
             }
     
     def get_size(self, buffer_id: str = 'default') -> Dict[str, Any]:
-        """獲取緩衝區大小"""
+        """獲取緩衝區Size"""
         with self._lock:
             size = len(self.buffers.get(buffer_id, []))
             return {
@@ -441,7 +441,7 @@ class BufferComponent:
             items = list(buffer)
             buffer.clear()
             
-            # 如果指定了目標，寫入文件
+            # 如果指定了目標，寫入File
             if target:
                 try:
                     Path(target).parent.mkdir(exist_ok=True)
@@ -455,7 +455,7 @@ class BufferComponent:
                         'target': target
                     }
                 except Exception as e:
-                    # 恢復數據
+                    # 恢復Data
                     buffer.extend(items)
                     return {
                         'success': False,
@@ -485,7 +485,7 @@ class BufferComponent:
             }
     
     def health_check(self) -> Dict[str, Any]:
-        """健康檢查"""
+        """Health check"""
         with self._lock:
             return {
                 'healthy': True,
@@ -496,7 +496,7 @@ class BufferComponent:
 
 
 class CacheComponent:
-    """Cache 組件 - 提供數據緩存功能"""
+    """Cache Component - 提供DataCacheFunction"""
     
     def __init__(self):
         self.cache: Dict[str, Dict] = OrderedDict()
@@ -510,9 +510,9 @@ class CacheComponent:
         self.max_size = 1000
     
     def set(self, key: str, value: Any, ttl: int = 3600) -> Dict[str, Any]:
-        """設置緩存"""
+        """SettingsCache"""
         with self._lock:
-            # 檢查緩存大小限制
+            # CheckCacheSize限制
             if len(self.cache) >= self.max_size and key not in self.cache:
                 # 移除最舊的項目
                 self.cache.popitem(last=False)
@@ -536,7 +536,7 @@ class CacheComponent:
             }
     
     def get(self, key: str) -> Dict[str, Any]:
-        """獲取緩存"""
+        """獲取Cache"""
         with self._lock:
             if key not in self.cache:
                 self.stats['misses'] += 1
@@ -544,13 +544,13 @@ class CacheComponent:
             
             item = self.cache[key]
             
-            # 檢查是否過期
+            # Check是否過期
             if datetime.now() > item['expire_time']:
                 del self.cache[key]
                 self.stats['misses'] += 1
                 return {'success': False, 'error': 'Key expired'}
             
-            # 更新訪問統計
+            # Update訪問統計
             item['access_count'] += 1
             
             # 移動到末尾（LRU）
@@ -567,7 +567,7 @@ class CacheComponent:
             }
     
     def delete(self, key: str) -> Dict[str, Any]:
-        """刪除緩存"""
+        """DeleteCache"""
         with self._lock:
             if key in self.cache:
                 del self.cache[key]
@@ -577,11 +577,11 @@ class CacheComponent:
                 return {'success': False, 'error': 'Key not found'}
     
     def exists(self, key: str) -> Dict[str, Any]:
-        """檢查緩存是否存在"""
+        """CheckCache是否存在"""
         with self._lock:
             exists = key in self.cache
             if exists:
-                # 檢查是否過期
+                # Check是否過期
                 if datetime.now() > self.cache[key]['expire_time']:
                     del self.cache[key]
                     exists = False
@@ -592,7 +592,7 @@ class CacheComponent:
             }
     
     def clear(self) -> Dict[str, Any]:
-        """清空所有緩存"""
+        """清空所有Cache"""
         with self._lock:
             count = len(self.cache)
             self.cache.clear()
@@ -603,7 +603,7 @@ class CacheComponent:
             }
     
     def cleanup_expired(self) -> Dict[str, Any]:
-        """清理過期的緩存項目"""
+        """清理過期的Cache項目"""
         with self._lock:
             now = datetime.now()
             expired_keys = [
@@ -620,7 +620,7 @@ class CacheComponent:
             }
     
     def get_stats(self) -> Dict[str, Any]:
-        """獲取緩存統計"""
+        """獲取Cache統計"""
         with self._lock:
             total_requests = self.stats['hits'] + self.stats['misses']
             hit_rate = self.stats['hits'] / total_requests if total_requests > 0 else 0
@@ -633,7 +633,7 @@ class CacheComponent:
             }
     
     def health_check(self) -> Dict[str, Any]:
-        """健康檢查"""
+        """Health check"""
         with self._lock:
             return {
                 'healthy': True,
@@ -644,20 +644,20 @@ class CacheComponent:
 
 
 class AISDKComponent:
-    """AI SDK 組件 - 提供 AI 相關功能"""
+    """AI SDK Component - 提供 AI 相關Function"""
     
     def __init__(self):
         self.request_count = 0
         self.error_count = 0
-        self.cache = {}  # 簡單的結果緩存
+        self.cache = {}  # 簡單的ResultCache
         self._lock = threading.RLock()
     
     def analyze_text(self, text: str) -> Dict[str, Any]:
-        """分析文本"""
+        """Analyze文本"""
         with self._lock:
             self.request_count += 1
             
-            # 簡化的文本分析實現
+            # 簡化的文本Analyze實現
             analysis = {
                 'length': len(text),
                 'word_count': len(text.split()),
@@ -669,7 +669,7 @@ class AISDKComponent:
             return {
                 'success': True,
                 'analysis': analysis,
-                'processing_time': 0.1  # 模擬處理時間
+                'processing_time': 0.1  # 模擬Processing time
             }
     
     def summarize(self, content: str, max_length: int = 100) -> Dict[str, Any]:
@@ -697,7 +697,7 @@ class AISDKComponent:
             }
     
     def extract_keywords(self, text: str, max_keywords: int = 10) -> Dict[str, Any]:
-        """提取關鍵字"""
+        """Extract keywords"""
         with self._lock:
             self.request_count += 1
             
@@ -761,11 +761,11 @@ class AISDKComponent:
             }
     
     def analyze_sentiment(self, text: str) -> Dict[str, Any]:
-        """情感分析"""
+        """Sentiment analysis"""
         with self._lock:
             self.request_count += 1
             
-            # 簡化的情感分析
+            # 簡化的Sentiment analysis
             positive_words = ['good', 'great', 'excellent', 'happy', '好', '棒', '優秀', '開心']
             negative_words = ['bad', 'terrible', 'awful', 'sad', '壞', '糟糕', '難過']
             
@@ -793,7 +793,7 @@ class AISDKComponent:
             }
     
     def generate_text(self, prompt: str, options: Dict[str, Any] = None) -> Dict[str, Any]:
-        """生成文本"""
+        """Generate text"""
         with self._lock:
             self.request_count += 1
             
@@ -803,11 +803,11 @@ class AISDKComponent:
             max_length = options.get('max_length', 100)
             style = options.get('style', 'informative')
             
-            # 簡化的文本生成
+            # 簡化的文本Generate
             templates = {
-                'informative': f"基於提示「{prompt}」，這裡是一些相關信息...",
+                'informative': f"基於提示「{prompt}」，這裡是一些相關Information...",
                 'creative': f"想像一下，如果{prompt}會發生什麼...",
-                'technical': f"關於{prompt}的技術分析如下...",
+                'technical': f"關於{prompt}的技術Analyze如下...",
                 'casual': f"說到{prompt}，我覺得..."
             }
             
@@ -825,7 +825,7 @@ class AISDKComponent:
             }
     
     def translate(self, text: str, target_lang: str = 'en') -> Dict[str, Any]:
-        """翻譯文本"""
+        """Translate text"""
         with self._lock:
             self.request_count += 1
             
@@ -837,7 +837,7 @@ class AISDKComponent:
                 '謝謝': {'en': 'thank you', 'zh': '謝謝', 'ja': 'ありがとう'}
             }
             
-            # 檢測源語言
+            # Detection源語言
             source_lang = 'zh' if any('\u4e00' <= char <= '\u9fff' for char in text) else 'en'
             
             # 簡單的翻譯邏輯
@@ -853,7 +853,7 @@ class AISDKComponent:
             }
     
     def get_stats(self) -> Dict[str, Any]:
-        """獲取統計信息"""
+        """獲取統計Information"""
         with self._lock:
             success_rate = ((self.request_count - self.error_count) / self.request_count) if self.request_count > 0 else 1.0
             
@@ -865,7 +865,7 @@ class AISDKComponent:
             }
     
     def cleanup(self) -> Dict[str, Any]:
-        """清理操作"""
+        """清理Operation"""
         with self._lock:
             old_cache_size = len(self.cache)
             self.cache.clear()
@@ -875,7 +875,7 @@ class AISDKComponent:
             }
     
     def health_check(self) -> Dict[str, Any]:
-        """健康檢查"""
+        """Health check"""
         with self._lock:
             stats = self.get_stats()
             

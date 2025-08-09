@@ -1,5 +1,5 @@
 """
-ActionQuality - Quality Check Action Executor
+ActionQuality - Quality Check Action Executor with Language-Specific Modules
 """
 
 from typing import Dict, Any, List
@@ -9,8 +9,32 @@ from pathlib import Path
 from .action_base import ActionExecutor, ActionResult
 from ..event_layer import HookEvent
 
+# Import quality modules
+try:
+    from .quality_modules.quality_python import PythonQualityChecker
+    from .quality_modules.quality_javascript import JavaScriptQualityChecker
+    from .quality_modules.quality_typescript import TypeScriptQualityChecker
+    from .quality_modules.quality_golang import GolangQualityChecker
+    from .quality_modules.quality_rust import RustQualityChecker
+    QUALITY_MODULES_AVAILABLE = True
+except ImportError:
+    QUALITY_MODULES_AVAILABLE = False
+
 class ActionQuality(ActionExecutor):
-    """Quality Check Action Executor"""
+    """Quality Check Action Executor with Language-Specific Support"""
+    
+    def __init__(self):
+        super().__init__()
+        # Initialize language-specific checkers
+        self.checkers = {}
+        if QUALITY_MODULES_AVAILABLE:
+            self.checkers = {
+                'python': PythonQualityChecker(),
+                'javascript': JavaScriptQualityChecker(), 
+                'typescript': TypeScriptQualityChecker(),
+                'golang': GolangQualityChecker(),
+                'rust': RustQualityChecker()
+            }
     
     def get_action_type(self) -> str:
         return "action.quality"
@@ -60,130 +84,186 @@ class ActionQuality(ActionExecutor):
             )
     
     def _perform_quality_check(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """ExecuteQuality check"""
-        try:
-            # 整合現有的Quality checkSystem
-            from ...quality_modules.quality_python import PythonQualityChecker
-            from ...quality_modules.quality_javascript import JavaScriptQualityChecker
-            from ...quality_modules.quality_typescript import TypeScriptQualityChecker
-            from ...quality_modules.quality_rust import RustQualityChecker
-            from ...quality_modules.quality_golang import GoQualityChecker
-            
-            checkers = {
-                '.py': PythonQualityChecker(),
-                '.js': JavaScriptQualityChecker(), 
-                '.jsx': JavaScriptQualityChecker(),
-                '.ts': TypeScriptQualityChecker(),
-                '.tsx': TypeScriptQualityChecker(),
-                '.rs': RustQualityChecker(),
-                '.go': GoQualityChecker()
-            }
-            
-            all_results = []
-            summary = {
+        """Execute comprehensive quality check using language-specific modules"""
+        results = {
+            'summary': {
                 'total_files': len(event.file_paths),
                 'files_checked': 0,
                 'total_issues': 0,
                 'total_errors': 0,
                 'total_warnings': 0,
                 'blocking_issues': False
-            }
-            
-            for file_path in event.file_paths:
-                file_ext = Path(file_path).suffix.lower()
-                if file_ext in checkers:
-                    checker = checkers[file_ext]
-                    result = checker.check_file(file_path)
-                    
-                    file_result = {
-                        'file': file_path,
-                        'checker': checker.get_checker_name(),
-                        'issues': len(result.issues),
-                        'errors': result.error_count,
-                        'warnings': result.warning_count,
-                        'result': result.to_dict() if hasattr(result, 'to_dict') else str(result)
-                    }
-                    
-                    all_results.append(file_result)
-                    
-                    # Update統計
-                    summary['files_checked'] += 1
-                    summary['total_issues'] += file_result['issues']
-                    summary['total_errors'] += file_result['errors']
-                    summary['total_warnings'] += file_result['warnings']
-                    
-                    if file_result['errors'] > 0:
-                        summary['blocking_issues'] = True
-            
-            return {
-                'summary': summary,
-                'results': all_results,
-                'recommendations': self._generate_quality_recommendations(all_results)
-            }
-            
-        except ImportError:
-            # 如果Quality checkModule不可用，使用基本Check
+            },
+            'file_results': [],
+            'quality_modules_available': QUALITY_MODULES_AVAILABLE
+        }
+        
+        if not QUALITY_MODULES_AVAILABLE:
+            # Fallback to basic quality check
             return self._basic_quality_check(event, parameters)
+            
+        # Check each file with appropriate language-specific checker
+        for file_path in event.file_paths:
+            file_ext = Path(file_path).suffix.lower()
+            
+            if file_ext in ext_to_checker:
+                checker_name = ext_to_checker[file_ext] 
+                if checker_name in self.checkers:
+                    try:
+                        # Use professional quality checker
+                        checker = self.checkers[checker_name]
+                        check_result = checker.check_file(file_path)
+                        
+                        file_result = {
+                            'file': file_path,
+                            'checker': checker.get_checker_name(),
+                            'issues': len(check_result.issues),
+                            'errors': check_result.error_count,
+                            'warnings': check_result.warning_count,
+                            'execution_time': check_result.execution_time,
+                            'details': [issue.to_dict() for issue in check_result.issues]
+                        }
+                        
+                        results['file_results'].append(file_result)
+                        
+                        # Update summary statistics
+                        results['summary']['files_checked'] += 1
+                        results['summary']['total_issues'] += file_result['issues']
+                        results['summary']['total_errors'] += file_result['errors']
+                        results['summary']['total_warnings'] += file_result['warnings']
+                        
+                        if file_result['errors'] > 0:
+                            results['summary']['blocking_issues'] = True
+                            
+                    except Exception as e:
+                        # Fallback to basic check for this file
+                        basic_result = self._check_file_basic(file_path)
+                        results['file_results'].append(basic_result)
+                        results['summary']['files_checked'] += 1
+            else:
+                # File type not supported by professional checkers, use basic check
+                basic_result = self._check_file_basic(file_path)
+                results['file_results'].append(basic_result)
+                results['summary']['files_checked'] += 1
+                
+        # Generate recommendations based on results
+        results['recommendations'] = self._generate_quality_recommendations(results['file_results'])
+        
+        return results
+    
+    def _check_file_basic(self, file_path: str) -> Dict[str, Any]:
+        """Basic file quality check fallback"""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except UnicodeDecodeError:
+            try:
+                with open(file_path, 'r', encoding='gbk') as f:
+                    content = f.read()
+            except Exception:
+                return {
+                    'file': file_path,
+                    'checker': 'basic',
+                    'issues': 1,
+                    'errors': 1,
+                    'warnings': 0,
+                    'details': ['Could not read file - encoding issue']
+                }
         except Exception as e:
             return {
-                'error': f"Quality checkFailed: {str(e)}",
-                'summary': {'total_files': len(event.file_paths), 'files_checked': 0}
-            }
-    
-    def _basic_quality_check(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """基本Quality check"""
-        all_results = []
-        
-        for file_path in event.file_paths:
-            try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-            except:
-                try:
-                    with open(file_path, 'r', encoding='gbk') as f:
-                        content = f.read()
-                except:
-                    continue
-            
-            issues = []
-            errors = 0
-            warnings = 0
-            
-            # 基本Check
-            lines = content.splitlines()
-            for i, line in enumerate(lines, 1):
-                if len(line) > 120:
-                    issues.append(f"第 {i} 行過長 (>{len(line)} 字符)")
-                    warnings += 1
-                
-                if line.strip().lower().startswith('todo') or 'fixme' in line.lower():
-                    issues.append(f"第 {i} 行包含 TODO/FIXME")
-                    warnings += 1
-                
-                # Check Tab 字符
-                if '\t' in line:
-                    issues.append(f"第 {i} 行包含 Tab 字符，建議使用空格")
-                    warnings += 1
-            
-            all_results.append({
                 'file': file_path,
                 'checker': 'basic',
-                'issues': len(issues),
-                'errors': errors,
-                'warnings': warnings,
-                'details': issues
-            })
+                'issues': 1,
+                'errors': 1,
+                'warnings': 0,
+                'details': [f'Could not read file: {str(e)}']
+            }
+            
+        issues = []
+        warnings = 0
         
+        lines = content.splitlines()
+        for i, line in enumerate(lines, 1):
+            if len(line) > 120:
+                issues.append(f"Line {i}: Too long ({len(line)} characters)")
+                warnings += 1
+            
+            if line.strip().lower().startswith('todo') or 'fixme' in line.lower():
+                issues.append(f"Line {i}: Contains TODO/FIXME")
+                warnings += 1
+                
+            if '\t' in line:
+                issues.append(f"Line {i}: Contains tabs, consider using spaces")
+                warnings += 1
+                
         return {
+            'file': file_path,
+            'checker': 'basic',
+            'issues': len(issues),
+            'errors': 0,
+            'warnings': warnings,
+            'details': issues
+        }
+    
+    def _basic_quality_check(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Fallback quality check when professional modules are not available"""
+        results = {
             'summary': {
                 'total_files': len(event.file_paths),
-                'files_checked': len(all_results),
-                'total_issues': sum(r['issues'] for r in all_results),
-                'total_errors': sum(r['errors'] for r in all_results),
-                'total_warnings': sum(r['warnings'] for r in all_results)
+                'files_checked': 0,
+                'total_issues': 0,
+                'total_errors': 0,
+                'total_warnings': 0,
+                'blocking_issues': False
             },
-            'results': all_results
+            'file_results': [],
+            'quality_modules_available': False
         }
+        
+        for file_path in event.file_paths:
+            file_result = self._check_file_basic(file_path)
+            results['file_results'].append(file_result)
+            
+            # Update summary
+            results['summary']['files_checked'] += 1
+            results['summary']['total_issues'] += file_result['issues']
+            results['summary']['total_errors'] += file_result['errors']
+            results['summary']['total_warnings'] += file_result['warnings']
+            
+            if file_result['errors'] > 0:
+                results['summary']['blocking_issues'] = True
+                
+        # Generate basic recommendations
+        results['recommendations'] = self._generate_quality_recommendations(results['file_results'])
+        
+        return results
+    
+    def _generate_quality_recommendations(self, file_results: List[Dict[str, Any]]) -> List[str]:
+        """Generate quality improvement recommendations based on results"""
+        recommendations = []
+        
+        total_errors = sum(result.get('errors', 0) for result in file_results)
+        total_warnings = sum(result.get('warnings', 0) for result in file_results)
+        
+        if total_errors > 0:
+            recommendations.append(f"Fix {total_errors} error(s) found - these may prevent compilation or execution")
+        
+        if total_warnings > 5:
+            recommendations.append(f"Address {total_warnings} warning(s) to improve code quality")
+        
+        # Language-specific recommendations
+        python_files = [r for r in file_results if r.get('file', '').endswith('.py')]
+        if python_files and any(r.get('issues', 0) > 0 for r in python_files):
+            recommendations.append("Consider using Black formatter and flake8 linter for Python files")
+            
+        js_files = [r for r in file_results if r.get('file', '').endswith(('.js', '.jsx'))]
+        if js_files and any(r.get('issues', 0) > 0 for r in js_files):
+            recommendations.append("Consider using Prettier formatter and ESLint for JavaScript files")
+            
+        if not recommendations:
+            recommendations.append("Code quality looks good! Consider running regular quality checks")
+            
+        return recommendations
     
     def _format_code(self, event: HookEvent, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Format化代碼"""

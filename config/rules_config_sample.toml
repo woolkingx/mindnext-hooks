@@ -8,7 +8,7 @@ enable = false  # DISABLED - This is a sample configuration file
 # Chinese keyword trigger rules  
 [[mappings]]
 event = "UserPromptSubmit"           # Event type
-rule = "keyboard"                    # Rule type: keyboard supports keyword arrays
+rule = "keyword"                     # Rule type: keyword supports keyword arrays
 condition = ["記憶", "記錄", "回憶"]    # Trigger keywords (any match will trigger)
 enable = true                        # Enable switch for this rule
 action_flow = [                      # Action execution flow
@@ -26,7 +26,7 @@ return_action = "provide_context"
 
 [[mappings]]
 event = "UserPromptSubmit"
-rule = "keyboard"
+rule = "keyword"
 condition = ["查詢", "搜尋", "找", "搜索"]  # Query related keywords
 enable = true
 action_flow = [
@@ -44,7 +44,7 @@ return_action = "provide_results"
 
 [[mappings]]
 event = "UserPromptSubmit" 
-rule = "keyboard"
+rule = "keyword"
 condition = ["分析", "解析", "分解"]      # Analysis related keywords
 enable = true
 action_flow = [

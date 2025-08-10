@@ -9,6 +9,15 @@ import re
 from pathlib import Path
 from .event_layer import HookEvent
 
+# Supported rule types
+SUPPORTED_RULE_TYPES = {
+    'simple',     # Simple condition matching
+    'regex',      # Regular expression matching
+    'keyword',    # Keyword matching
+    'function',   # Function-based evaluation
+    'composite'   # Composite conditions
+}
+
 @dataclass
 class RuleCondition:
     """Rule condition definition"""
@@ -74,7 +83,7 @@ class RuleEngine:
                 import toml
                 with open(system_config_file, 'r', encoding='utf-8') as f:
                     self.system_config = toml.load(f)
-                print(f"Loaded system config: {system_config_file}")
+                print(f"[system] {Path(system_config_file).name}")
             except Exception as e:
                 print(f"Failed to load system config: {e}")
                 self.system_config = self._get_default_system_config()
@@ -127,8 +136,7 @@ class RuleEngine:
             
             # Check config.enable at file level
             if not config.get('config', {}).get('enable', True):
-                print(f"Config disabled: {filename}")
-                return
+                return  # Skip disabled config
             
             # Check if it's mapping format or standard format
             if 'mappings' in config:
@@ -148,19 +156,9 @@ class RuleEngine:
             if not mapping.get('enable', True):
                 continue
             
-            # Handle keyboard rule type with array support
-            if mapping['rule'] == 'keyboard':
-                condition = mapping['condition']
-                # If condition is array, convert to OR expression
-                if isinstance(condition, list):
-                    conditions_str = " or ".join([f"'{kw}' in user_prompt" for kw in condition])
-                    expression = f"({conditions_str})"
-                else:
-                    expression = condition
-                rule_type = 'simple'
-            else:
-                expression = mapping['condition'] 
-                rule_type = mapping['rule']
+            # Get expression and rule type
+            expression = mapping['condition']
+            rule_type = mapping['rule']
                 
             rule = Rule(
                 id=f"mapping_rule_{i+1}",
@@ -302,6 +300,8 @@ class RuleEngine:
         try:
             if condition.condition_type == "simple":
                 return self._evaluate_simple_condition(condition.expression, event)
+            elif condition.condition_type == "keyword":
+                return self._evaluate_keyword_condition(condition.expression, event)
             elif condition.condition_type == "regex":
                 return self._evaluate_regex_condition(condition.expression, event)
             elif condition.condition_type == "function":
@@ -361,6 +361,20 @@ class RuleEngine:
             
             return eval(expression, {"__builtins__": {}}, allowed_names)
         except:
+            return False
+    
+    def _evaluate_keyword_condition(self, expression: Union[str, List[str]], event: HookEvent) -> bool:
+        """Evaluate keyword condition - supports both string and array"""
+        # Get text to search in
+        search_text = event.user_prompt or event.content or ''
+        
+        # Handle array of keywords (OR logic)
+        if isinstance(expression, list):
+            return any(keyword in search_text for keyword in expression)
+        # Handle single keyword
+        elif isinstance(expression, str):
+            return expression in search_text
+        else:
             return False
     
     def _evaluate_regex_condition(self, expression: str, event: HookEvent) -> bool:
@@ -512,5 +526,19 @@ class RuleEngine:
         config_files = glob.glob(json_pattern) + glob.glob(toml_pattern)
         
         for config_file in config_files:
-            print(f"Loading rules from: {config_file}")
-            self.load_rules_from_config(config_file)
+            filename = Path(config_file).name
+            # Load config to check if it's enabled
+            if config_file.endswith('.toml'):
+                import toml
+                with open(config_file, 'r', encoding='utf-8') as f:
+                    config = toml.load(f)
+            else:
+                with open(config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+            
+            # Print status and load if enabled
+            if not config.get('config', {}).get('enable', True):
+                print(f"[disabled] {filename}")
+            else:
+                print(f"[enabled] {filename}")
+                self.load_rules_from_config(config_file)

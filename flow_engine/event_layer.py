@@ -1,5 +1,5 @@
 """
-Event層 - 負責Event的Receive、解析和標準化
+Event Layer - Handles event receiving, parsing and standardization
 """
 
 from dataclasses import dataclass, field
@@ -7,6 +7,18 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime
 from pathlib import Path
 import json
+
+# Claude Code supported hook events
+SUPPORTED_EVENTS = {
+    'UserPromptSubmit',
+    'PreToolUse', 
+    'PostToolUse',
+    'SessionStart',
+    'SessionEnd',
+    'Stop',
+    'Error',
+    'Notification'
+}
 
 @dataclass
 class HookEvent:

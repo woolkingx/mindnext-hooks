@@ -1,0 +1,51 @@
+# Jekyll Configuration for MindNext Hooks
+title: MindNext Hooks System
+description: Three-Layer Architecture Hooks System for Claude Code
+baseurl: "/mindnext-hooks"
+url: "https://woolkingx.github.io"
+
+# GitHub Pages settings
+source: ./docs
+destination: ./_site
+
+# Theme
+remote_theme: primer/primer
+
+# Plugins
+plugins:
+  - jekyll-github-metadata
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Exclude files from processing
+exclude:
+  - node_modules/
+  - cleanup/
+  - requirements.txt
+  - setup.py
+  - "*.py"
+  - __pycache__/
+  - .git/
+  - .github/
+  - config/
+  - flow_engine/
+  - record/
+  - validation_report_*.json
+
+# Include files
+include:
+  - docs/
+
+# Sass
+sass:
+  sass_dir: docs/assets/css
+
+# Markdown
+markdown: kramdown
+highlighter: rouge
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:name/

@@ -1,0 +1,338 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mindnext.dev/schema/PreToolUse.json",
+  "title": "PreToolUse Hook API",
+  "description": "工具執行前事件的完整 API 定義 (Input + Output + Rule)",
+  "examples": {
+    "event_example": {
+      "hook_event_name": "PreToolUse",
+      "session_id": "abc-123",
+      "transcript_path": "/home/user/.claude/transcripts/xyz.jsonl",
+      "cwd": "/home/user/project",
+      "permission_mode": "default",
+      "tool_name": "Bash",
+      "tool_input": {
+        "command": "rm -rf /tmp/test"
+      },
+      "tool_use_id": "tool-456"
+    },
+    "response_allow_example": {
+      "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "allow"
+      }
+    },
+    "response_deny_example": {
+      "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "deny",
+        "permissionDecisionReason": "危險命令: rm -rf"
+      }
+    },
+    "response_transform_example": {
+      "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "allow",
+        "updatedInput": {
+          "command": "trash-put /tmp/test"
+        }
+      }
+    },
+    "rule_deny_example": {
+      "name": "deny-rm-rf",
+      "description": "阻止 rm -rf 命令",
+      "enabled": true,
+      "event": "PreToolUse",
+      "priority": 90,
+      "tool": "Bash",
+      "match": {
+        "cmd": "rm",
+        "flags": [
+          "r",
+          "f"
+        ]
+      },
+      "action": "deny",
+      "reason": "危險命令"
+    },
+    "rule_transform_example": {
+      "name": "rm-to-trash",
+      "description": "將 rm 轉換為 trash-put",
+      "enabled": true,
+      "event": "PreToolUse",
+      "tool": "Bash",
+      "match": {
+        "cmd": "rm"
+      },
+      "action": "transform",
+      "updatedInput": {
+        "field": "command",
+        "pattern": "^rm\\s+",
+        "replace": "trash-put "
+      }
+    }
+  },
+  "definitions": {
+    "event": {
+      "title": "PreToolUse Event Input",
+      "description": "從 Claude Code stdin 接收的 payload",
+      "x-usage": "此事件在 Claude 調用工具前觸發,可用於權限控制、輸入轉換、日誌記錄",
+      "x-canBlock": true,
+      "type": "object",
+      "required": [
+        "cwd",
+        "tool_input",
+        "transcript_path",
+        "hook_event_name",
+        "session_id",
+        "tool_use_id",
+        "tool_name",
+        "permission_mode"
+      ],
+      "properties": {
+        "hook_event_name": {
+          "type": "string",
+          "const": "PreToolUse"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "會話 ID"
+        },
+        "transcript_path": {
+          "type": "string",
+          "description": "對話記錄路徑"
+        },
+        "cwd": {
+          "type": "string",
+          "description": "當前工作目錄"
+        },
+        "tool_name": {
+          "type": "string",
+          "description": "工具名稱 (如 Bash, Read, Write)",
+          "examples": [
+            "Bash",
+            "Read",
+            "Write",
+            "Edit",
+            "Grep",
+            "Glob"
+          ]
+        },
+        "tool_input": {
+          "type": "object",
+          "description": "工具輸入參數 (結構因工具而異)",
+          "examples": [
+            {
+              "command": "ls -la"
+            },
+            {
+              "file_path": "/tmp/test.txt"
+            }
+          ]
+        },
+        "tool_use_id": {
+          "type": "string",
+          "description": "工具使用 ID"
+        },
+        "permission_mode": {
+          "type": "string",
+          "enum": [
+            "default",
+            "plan",
+            "acceptEdits",
+            "dontAsk",
+            "bypassPermissions"
+          ],
+          "description": "權限模式"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "title": "PreToolUse Response Output",
+      "description": "輸出到 Claude Code stdout 的 JSON",
+      "type": "object",
+      "properties": {
+        "continue": {
+          "type": "boolean",
+          "description": "false 時完全停止 Claude"
+        },
+        "stopReason": {
+          "type": "string",
+          "description": "停止原因 (給用戶)"
+        },
+        "suppressOutput": {
+          "type": "boolean",
+          "description": "隱藏輸出"
+        },
+        "systemMessage": {
+          "type": "string",
+          "description": "警告消息 (給用戶)"
+        },
+        "hookSpecificOutput": {
+          "type": "object",
+          "description": "PreToolUse 專用輸出",
+          "properties": {
+            "hookEventName": {
+              "type": "string",
+              "const": "PreToolUse",
+              "description": "事件名稱 (必填)"
+            },
+            "permissionDecision": {
+              "type": "string",
+              "enum": [
+                "allow",
+                "deny",
+                "ask"
+              ],
+              "description": "權限決策"
+            },
+            "permissionDecisionReason": {
+              "type": "string",
+              "description": "決策原因 (反饋給 Claude)"
+            },
+            "updatedInput": {
+              "type": "object",
+              "description": "修改後的工具輸入 (當 permissionDecision=allow 時)"
+            }
+          },
+          "required": [
+            "hookEventName"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "title": "PreToolUse Rule Config",
+      "description": "config/rules/*.md 中的 YAML frontmatter",
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "enabled",
+        "event"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Rule 唯一名稱",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "description": {
+          "type": "string",
+          "description": "Rule 說明"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "是否啟用"
+        },
+        "event": {
+          "type": "string",
+          "const": "PreToolUse"
+        },
+        "priority": {
+          "type": "integer",
+          "default": 50,
+          "minimum": 0,
+          "maximum": 100,
+          "description": "執行優先級 (越大越先執行)"
+        },
+        "tool": {
+          "type": "string",
+          "description": "過濾特定工具 (如 Bash, Read)",
+          "examples": [
+            "Bash",
+            "Read",
+            "Write"
+          ]
+        },
+        "match": {
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Regex 匹配 command/path"
+            },
+            {
+              "type": "object",
+              "description": "結構化匹配 (Bash 專用)",
+              "properties": {
+                "cmd": {
+                  "type": "string"
+                },
+                "flags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "args": {
+                  "type": "string"
+                },
+                "any_cmd": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "deny",
+            "ask",
+            "transform"
+          ],
+          "description": "執行動作"
+        },
+        "reason": {
+          "type": "string",
+          "description": "動作原因 (給 Claude)"
+        },
+        "updatedInput": {
+          "type": "object",
+          "description": "輸入轉換規則 (action=transform 時使用)",
+          "properties": {
+            "field": {
+              "type": "string",
+              "description": "要修改的欄位",
+              "examples": [
+                "command",
+                "file_path"
+              ]
+            },
+            "pattern": {
+              "type": "string",
+              "description": "匹配的 regex"
+            },
+            "replace": {
+              "type": "string",
+              "description": "替換內容"
+            }
+          },
+          "required": [
+            "field",
+            "pattern",
+            "replace"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/definitions/event"
+    },
+    {
+      "$ref": "#/definitions/response"
+    },
+    {
+      "$ref": "#/definitions/rule"
+    }
+  ]
+}

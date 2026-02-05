@@ -1,0 +1,185 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mindnext.dev/schema/PreCompact.json",
+  "title": "PreCompact Hook API",
+  "description": "對話壓縮前事件的完整 API 定義。無輸出控制，只能提供上下文和系統控制信號。",
+  "examples": {
+    "event_example": {
+      "hook_event_name": "PreCompact",
+      "session_id": "abc-123",
+      "transcript_path": "/home/user/.claude/transcripts/xyz.jsonl",
+      "cwd": "/home/user/project",
+      "permission_mode": "default",
+      "trigger": "context_limit",
+      "custom_instructions": "保留關於架構的討論"
+    },
+    "response_example_context": {
+      "continue": true,
+      "additionalContext": "上次討論的關鍵決策：採用分層設計，理由是可擴展性"
+    },
+    "response_example_stop": {
+      "continue": false,
+      "stopReason": "壓縮器已達最優狀態，無需進一步調整"
+    }
+  },
+  "definitions": {
+    "event": {
+      "title": "PreCompact Event Input",
+      "description": "從 Claude Code stdin 接收的 payload。PreCompact 無法阻止壓縮或修改輸入，只能提供指導。",
+      "x-usage": "對話壓縮前觸發，用於上下文審計和壓縮策略指導",
+      "x-canBlock": false,
+      "x-canModifyInput": false,
+      "x-outputControl": "none",
+      "type": "object",
+      "required": [
+        "cwd",
+        "trigger",
+        "transcript_path",
+        "hook_event_name",
+        "session_id",
+        "permission_mode"
+      ],
+      "properties": {
+        "hook_event_name": {
+          "type": "string",
+          "const": "PreCompact",
+          "description": "事件名稱"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "當前會話 ID"
+        },
+        "transcript_path": {
+          "type": "string",
+          "description": "對話紀錄文件路徑"
+        },
+        "cwd": {
+          "type": "string",
+          "description": "當前工作目錄"
+        },
+        "trigger": {
+          "type": "string",
+          "description": "觸發壓縮的原因（如 'context_limit', 'user_request'）"
+        },
+        "custom_instructions": {
+          "type": "string",
+          "description": "用戶自定義的壓縮指示（可選）"
+        },
+        "permission_mode": {
+          "type": "string",
+          "enum": [
+            "default",
+            "plan",
+            "acceptEdits",
+            "dontAsk",
+            "bypassPermissions"
+          ],
+          "description": "權限模式"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "title": "PreCompact Response Output",
+      "description": "PreCompact 無法控制輸出，只能返回通用系統控制信號和上下文。",
+      "x-outputControl": "context_and_system_only",
+      "x-nohookSpecificOutput": "預 Compact 無 hookSpecificOutput",
+      "type": "object",
+      "required": [],
+      "properties": {
+        "continue": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否繼續壓縮（true：繼續；false：停止壓縮）"
+        },
+        "stopReason": {
+          "type": "string",
+          "description": "若 continue=false，提供停止原因"
+        },
+        "suppressOutput": {
+          "type": "boolean",
+          "description": "是否抑制壓縮過程的輸出信息"
+        },
+        "systemMessage": {
+          "type": "string",
+          "description": "系統級控制訊息"
+        },
+        "additionalContext": {
+          "type": "string",
+          "description": "提供給壓縮器的額外上下文（如保留重點、優先級等）"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "title": "PreCompact Rule Config",
+      "description": "PreCompact 規則配置。支持 'context' action 提供上下文指導。",
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "enabled",
+        "event"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "規則名稱"
+        },
+        "description": {
+          "type": "string",
+          "description": "規則描述"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "規則是否啟用"
+        },
+        "event": {
+          "type": "string",
+          "const": "PreCompact",
+          "description": "事件類型"
+        },
+        "priority": {
+          "type": "integer",
+          "default": 50,
+          "description": "規則優先級（0-100）"
+        },
+        "match": {
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "正則表達式，匹配 trigger 欄位"
+            },
+            {
+              "type": "object",
+              "description": "結構化匹配條件"
+            }
+          ]
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "context"
+          ],
+          "description": "操作類型。PreCompact 只支持 'context'（提供上下文指導）"
+        },
+        "reason": {
+          "type": "string",
+          "description": "操作原因"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/definitions/event"
+    },
+    {
+      "$ref": "#/definitions/response"
+    },
+    {
+      "$ref": "#/definitions/rule"
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mindnext.dev/schema/Notification.json",
+  "title": "Notification Hook API",
+  "description": "通知發送事件的完整 API 定義",
+  "examples": {
+    "event_example": {
+      "hook_event_name": "Notification",
+      "session_id": "abc-123",
+      "transcript_path": "/home/user/.claude/transcripts/xyz.jsonl",
+      "cwd": "/home/user/project",
+      "permission_mode": "default",
+      "message": "File saved successfully",
+      "notification_type": "success"
+    },
+    "response_example": {
+      "comment": "此事件無輸出控制，response 為空 (無操作)"
+    },
+    "rule_example": {
+      "name": "log-notifications",
+      "description": "記錄所有通知",
+      "enabled": true,
+      "event": "Notification",
+      "match": ".*",
+      "action": "context",
+      "reason": "審計日誌"
+    }
+  },
+  "definitions": {
+    "event": {
+      "title": "Notification Event Input",
+      "description": "從 Claude Code stdin 接收的 payload",
+      "x-usage": "通知發送時觸發，用於審計和日誌",
+      "x-canBlock": false,
+      "type": "object",
+      "required": [
+        "cwd",
+        "message",
+        "notification_type",
+        "transcript_path",
+        "hook_event_name",
+        "session_id"
+      ],
+      "properties": {
+        "hook_event_name": {
+          "type": "string",
+          "const": "Notification"
+        },
+        "session_id": {
+          "type": "string"
+        },
+        "transcript_path": {
+          "type": "string"
+        },
+        "cwd": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string",
+          "description": "通知訊息"
+        },
+        "notification_type": {
+          "type": "string",
+          "description": "通知類型 (success, info, warning, error)"
+        },
+        "permission_mode": {
+          "type": "string",
+          "enum": [
+            "default",
+            "plan",
+            "acceptEdits",
+            "dontAsk",
+            "bypassPermissions"
+          ],
+          "description": "權限模式"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "title": "Notification Response Output",
+      "description": "輸出到 Claude Code stdout 的 JSON。此事件無輸出控制（不可阻止、不可注入、不可修改）",
+      "x-usage": "通知發送無法被攔截，handler 僅能記錄審計日誌或添加上下文",
+      "x-canBlock": false,
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "rule": {
+      "title": "Notification Rule Config",
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "enabled",
+        "event"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "event": {
+          "type": "string",
+          "const": "Notification"
+        },
+        "priority": {
+          "type": "integer",
+          "default": 50
+        },
+        "match": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object"
+            }
+          ]
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "context"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "description": "config/rules/*.md 中的 YAML frontmatter"
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/definitions/event"
+    },
+    {
+      "$ref": "#/definitions/response"
+    },
+    {
+      "$ref": "#/definitions/rule"
+    }
+  ]
+}

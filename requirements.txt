@@ -1,0 +1,8 @@
+# Core Dependencies
+PyYAML>=6.0.1
+
+# Optional Dependencies
+jsonschema>=4.17.0  # For schema validation (optional, recommended for development)
+
+# Python Version Requirement
+# Requires Python 3.11+ for tomllib (standard library)

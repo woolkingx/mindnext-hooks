@@ -1,0 +1,312 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mindnext.dev/schema/PostToolUse.json",
+  "title": "PostToolUse Hook API",
+  "description": "工具執行後事件的完整 API 定義 (Input + Output + Rule)",
+  "examples": {
+    "event_example": {
+      "hook_event_name": "PostToolUse",
+      "session_id": "abc-123",
+      "transcript_path": "/home/user/.claude/transcripts/xyz.jsonl",
+      "cwd": "/home/user/project",
+      "permission_mode": "default",
+      "tool_name": "Bash",
+      "tool_input": {
+        "command": "ls -la"
+      },
+      "tool_response": {
+        "stdout": "total 12\ndrwxr-xr-x 2 user user 4096 Jan 31 10:00 .",
+        "stderr": "",
+        "interrupted": false,
+        "isImage": false
+      },
+      "tool_use_id": "tool-456"
+    },
+    "response_block_example": {
+      "decision": "block",
+      "reason": "輸出包含敏感資訊",
+      "hookSpecificOutput": {
+        "hookEventName": "PostToolUse",
+        "additionalContext": "此工具輸出已被阻止"
+      }
+    },
+    "response_context_example": {
+      "hookSpecificOutput": {
+        "hookEventName": "PostToolUse",
+        "additionalContext": "此命令執行成功，耗時 0.5 秒"
+      }
+    },
+    "rule_block_example": {
+      "name": "block-sensitive-output",
+      "description": "阻止包含敏感資訊的輸出",
+      "enabled": true,
+      "event": "PostToolUse",
+      "tool": "Bash",
+      "match": "password|secret|token",
+      "action": "block",
+      "reason": "敏感資訊保護"
+    }
+  },
+  "definitions": {
+    "event": {
+      "title": "PostToolUse Event Input",
+      "description": "從 Claude Code stdin 接收的 payload",
+      "x-usage": "此事件在 Claude 工具執行後觸發，可用於輸出驗證、日誌、決策",
+      "x-canBlock": true,
+      "type": "object",
+      "required": [
+        "cwd",
+        "tool_input",
+        "transcript_path",
+        "hook_event_name",
+        "session_id",
+        "tool_response",
+        "tool_use_id",
+        "tool_name",
+        "permission_mode"
+      ],
+      "properties": {
+        "hook_event_name": {
+          "type": "string",
+          "const": "PostToolUse"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "會話 ID"
+        },
+        "transcript_path": {
+          "type": "string",
+          "description": "對話記錄路徑"
+        },
+        "cwd": {
+          "type": "string",
+          "description": "當前工作目錄"
+        },
+        "tool_name": {
+          "type": "string",
+          "description": "工具名稱"
+        },
+        "tool_input": {
+          "type": "object",
+          "description": "工具輸入參數"
+        },
+        "tool_response": {
+          "oneOf": [
+            {
+              "type": "object",
+              "description": "Bash 工具執行結果 (Claude Code 內建格式)",
+              "properties": {
+                "stdout": {
+                  "type": "string"
+                },
+                "stderr": {
+                  "type": "string"
+                },
+                "interrupted": {
+                  "type": "boolean"
+                },
+                "isImage": {
+                  "type": "boolean"
+                }
+              }
+            },
+            {
+              "type": "array",
+              "description": "MCP 工具執行結果 (Anthropic API tool_result.content 格式)",
+              "items": {
+                "type": "object",
+                "required": ["type"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "Content block 類型"
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "文本內容 (type=text 時使用)"
+                  },
+                  "source": {
+                    "type": "object",
+                    "description": "圖片來源 (type=image 時使用)",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["base64"]
+                      },
+                      "media_type": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "Tool use ID (type=tool_use 時使用)"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Tool 名稱 (type=tool_use 時使用)"
+                  },
+                  "input": {
+                    "type": "object",
+                    "description": "Tool 輸入 (type=tool_use 時使用)"
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            {
+              "type": "string",
+              "description": "簡寫格式 (API 內部會轉為 [{\"type\":\"text\",\"text\":\"...\"}])"
+            }
+          ]
+        },
+        "tool_use_id": {
+          "type": "string",
+          "description": "工具使用 ID"
+        },
+        "permission_mode": {
+          "type": "string",
+          "enum": [
+            "default",
+            "plan",
+            "acceptEdits",
+            "dontAsk",
+            "bypassPermissions"
+          ],
+          "description": "權限模式"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "title": "PostToolUse Response Output",
+      "description": "輸出到 Claude Code stdout 的 JSON",
+      "type": "object",
+      "properties": {
+        "continue": {
+          "type": "boolean",
+          "description": "false 時完全停止 Claude"
+        },
+        "stopReason": {
+          "type": "string",
+          "description": "停止原因 (給用戶)"
+        },
+        "suppressOutput": {
+          "type": "boolean",
+          "description": "隱藏輸出"
+        },
+        "systemMessage": {
+          "type": "string",
+          "description": "警告消息 (給用戶)"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "block",
+            "undefined"
+          ],
+          "description": "決策結果"
+        },
+        "reason": {
+          "type": "string",
+          "description": "決策原因 (block 時必填)"
+        },
+        "hookSpecificOutput": {
+          "type": "object",
+          "description": "PostToolUse 專用輸出",
+          "properties": {
+            "hookEventName": {
+              "type": "string",
+              "const": "PostToolUse",
+              "description": "事件名稱 (必填)"
+            },
+            "additionalContext": {
+              "type": "string",
+              "description": "額外上下文資訊"
+            }
+          },
+          "required": [
+            "hookEventName"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "title": "PostToolUse Rule Config",
+      "description": "config/rules/*.md 中的 YAML frontmatter",
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "enabled",
+        "event"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Rule 唯一名稱"
+        },
+        "description": {
+          "type": "string",
+          "description": "Rule 說明"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "是否啟用"
+        },
+        "event": {
+          "type": "string",
+          "const": "PostToolUse"
+        },
+        "priority": {
+          "type": "integer",
+          "default": 50,
+          "minimum": 0,
+          "maximum": 100
+        },
+        "tool": {
+          "type": "string",
+          "description": "過濾特定工具"
+        },
+        "match": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object"
+            }
+          ]
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "block",
+            "context"
+          ],
+          "description": "執行動作"
+        },
+        "reason": {
+          "type": "string",
+          "description": "動作原因"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/definitions/event"
+    },
+    {
+      "$ref": "#/definitions/response"
+    },
+    {
+      "$ref": "#/definitions/rule"
+    }
+  ]
+}

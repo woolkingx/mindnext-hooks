@@ -1,0 +1,235 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mindnext.dev/schema/UserPromptSubmit.json",
+  "title": "UserPromptSubmit Hook API",
+  "description": "用戶提交 prompt 事件的完整 API 定義 (Input + Output + Rule)",
+  "examples": {
+    "event_example": {
+      "hook_event_name": "UserPromptSubmit",
+      "session_id": "abc-123",
+      "transcript_path": "/home/user/.claude/transcripts/xyz.jsonl",
+      "cwd": "/home/user/project",
+      "permission_mode": "default",
+      "prompt": "幫我審查這個代碼"
+    },
+    "response_block_example": {
+      "decision": "block",
+      "reason": "檢測到不安全的內容，已阻止提交"
+    },
+    "response_context_example": {
+      "hookSpecificOutput": {
+        "hookEventName": "UserPromptSubmit",
+        "additionalContext": "根據項目歷史，這類任務通常需要 30 分鐘完成"
+      }
+    },
+    "rule_block_example": {
+      "name": "block-dangerous-prompts",
+      "description": "阻擋危險的 prompt",
+      "enabled": true,
+      "event": "UserPromptSubmit",
+      "priority": 90,
+      "match": "rm -rf|delete database",
+      "action": "block",
+      "reason": "檢測到危險操作"
+    },
+    "rule_context_example": {
+      "name": "add-tags-context",
+      "description": "為 prompt 添加 tags 上下文",
+      "enabled": true,
+      "event": "UserPromptSubmit",
+      "priority": 50,
+      "action": "context",
+      "feature": [
+        "tags",
+        "memory"
+      ]
+    }
+  },
+  "definitions": {
+    "event": {
+      "title": "UserPromptSubmit Event Input",
+      "description": "從 Claude Code stdin 接收的 payload",
+      "x-usage": "此事件在用戶提交 prompt 時觸發，可阻止提交、注入上下文或激活功能模組 (tags, memory 等)",
+      "x-canBlock": true,
+      "type": "object",
+      "required": [
+        "cwd",
+        "transcript_path",
+        "prompt",
+        "hook_event_name",
+        "session_id",
+        "permission_mode"
+      ],
+      "properties": {
+        "hook_event_name": {
+          "type": "string",
+          "const": "UserPromptSubmit"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "會話 ID"
+        },
+        "transcript_path": {
+          "type": "string",
+          "description": "對話記錄路徑"
+        },
+        "cwd": {
+          "type": "string",
+          "description": "當前工作目錄"
+        },
+        "prompt": {
+          "type": "string",
+          "description": "用戶輸入的 prompt"
+        },
+        "permission_mode": {
+          "type": "string",
+          "enum": [
+            "default",
+            "plan",
+            "acceptEdits",
+            "dontAsk",
+            "bypassPermissions"
+          ],
+          "description": "權限模式"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "title": "UserPromptSubmit Response Output",
+      "description": "輸出到 Claude Code stdout 的 JSON",
+      "type": "object",
+      "properties": {
+        "continue": {
+          "type": "boolean",
+          "description": "false 時完全停止 Claude"
+        },
+        "stopReason": {
+          "type": "string",
+          "description": "停止原因 (給用戶)"
+        },
+        "suppressOutput": {
+          "type": "boolean",
+          "description": "隱藏輸出"
+        },
+        "systemMessage": {
+          "type": "string",
+          "description": "警告消息 (給用戶)"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "block"
+          ],
+          "description": "阻止用戶提交 (清除輸入)"
+        },
+        "reason": {
+          "type": "string",
+          "description": "阻止原因 (給用戶)"
+        },
+        "hookSpecificOutput": {
+          "type": "object",
+          "description": "UserPromptSubmit 專用輸出",
+          "required": [
+            "hookEventName"
+          ],
+          "properties": {
+            "hookEventName": {
+              "type": "string",
+              "const": "UserPromptSubmit",
+              "description": "事件名稱 (必填，符合官方 API 要求)"
+            },
+            "additionalContext": {
+              "type": "string",
+              "description": "額外上下文 (注入給 Claude)"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "title": "UserPromptSubmit Rule Config",
+      "description": "config/rules/*.md 中的 YAML frontmatter",
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "enabled",
+        "event"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Rule 唯一名稱",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "description": {
+          "type": "string",
+          "description": "Rule 說明"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "是否啟用"
+        },
+        "event": {
+          "type": "string",
+          "const": "UserPromptSubmit"
+        },
+        "priority": {
+          "type": "integer",
+          "default": 50,
+          "minimum": 0,
+          "maximum": 100,
+          "description": "執行優先級 (越大越先執行)"
+        },
+        "match": {
+          "type": "string",
+          "description": "Regex 匹配 prompt 內容"
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "block",
+            "context"
+          ],
+          "description": "執行動作"
+        },
+        "reason": {
+          "type": "string",
+          "description": "動作原因 (給 Claude)"
+        },
+        "feature": {
+          "type": "array",
+          "description": "要啟用的功能模組",
+          "items": {
+            "type": "string",
+            "enum": [
+              "tags",
+              "memory",
+              "agents",
+              "skills",
+              "refer_kwg",
+              "global_rules",
+              "matched_rules"
+            ]
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/definitions/event"
+    },
+    {
+      "$ref": "#/definitions/response"
+    },
+    {
+      "$ref": "#/definitions/rule"
+    }
+  ]
+}

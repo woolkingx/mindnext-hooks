@@ -1,0 +1,181 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mindnext.dev/schema/SubagentStop.json",
+  "title": "SubagentStop Hook API",
+  "description": "子代理結束響應事件的完整 API 定義 (Decision Class - 頂層 decision + reason)",
+  "examples": {
+    "event_example": {
+      "hook_event_name": "SubagentStop",
+      "session_id": "abc-123",
+      "transcript_path": "/home/user/.claude/transcripts/xyz.jsonl",
+      "cwd": "/home/user/project",
+      "permission_mode": "default",
+      "stop_hook_active": true,
+      "agent_id": "agent-123",
+      "agent_type": "code-review"
+    },
+    "response_block_example": {
+      "decision": "block",
+      "reason": "結果需要進一步驗證"
+    },
+    "response_allow_example": {
+      "decision": "allow"
+    },
+    "response_with_system_example": {
+      "decision": "block",
+      "reason": "結果驗證失敗",
+      "continue": false,
+      "stopReason": "SubagentStop 驗證失敗"
+    }
+  },
+  "definitions": {
+    "event": {
+      "title": "SubagentStop Event Input",
+      "description": "從 Claude Code stdin 接收的 payload",
+      "x-usage": "子代理結束響應前觸發，可用於驗證和決策",
+      "x-canBlock": true,
+      "x-eventClass": "Decision",
+      "x-output": "頂層 decision + reason (無 hookSpecificOutput)",
+      "type": "object",
+      "required": [
+        "cwd",
+        "transcript_path",
+        "hook_event_name",
+        "session_id",
+        "permission_mode"
+      ],
+      "properties": {
+        "hook_event_name": {
+          "type": "string",
+          "const": "SubagentStop",
+          "description": "事件名稱"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "會話 ID"
+        },
+        "transcript_path": {
+          "type": "string",
+          "description": "轉錄檔案路徑"
+        },
+        "cwd": {
+          "type": "string",
+          "description": "工作目錄"
+        },
+        "stop_hook_active": {
+          "type": "boolean",
+          "description": "Stop Hook 是否活躍"
+        },
+        "agent_id": {
+          "type": "string",
+          "description": "代理 ID"
+        },
+        "agent_type": {
+          "type": "string",
+          "description": "代理類型"
+        },
+        "permission_mode": {
+          "type": "string",
+          "enum": [
+            "default",
+            "plan",
+            "acceptEdits",
+            "dontAsk",
+            "bypassPermissions"
+          ],
+          "description": "權限模式"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "title": "SubagentStop Response Output",
+      "description": "輸出到 Claude Code stdout 的 JSON (頂層 decision)",
+      "x-note": "SubagentStop 是 Decision Class，輸出在頂層而非 hookSpecificOutput",
+      "type": "object",
+      "properties": {
+        "decision": {
+          "type": "string",
+          "enum": [
+            "block",
+            "allow"
+          ],
+          "description": "決策: block 阻止子代理結束，allow 允許繼續"
+        },
+        "reason": {
+          "type": "string",
+          "description": "決策原因 (block 時應填充)"
+        },
+        "continue": {
+          "type": "boolean",
+          "description": "是否繼續處理 (default: true)",
+          "default": true
+        },
+        "stopReason": {
+          "type": "string",
+          "description": "停止原因"
+        },
+        "suppressOutput": {
+          "type": "boolean",
+          "description": "是否隱藏輸出"
+        },
+        "systemMessage": {
+          "type": "string",
+          "description": "系統訊息"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "title": "SubagentStop Rule Config",
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "enabled",
+        "event"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "event": {
+          "type": "string",
+          "const": "SubagentStop"
+        },
+        "priority": {
+          "type": "integer",
+          "default": 50
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "block"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "description": "config/rules/*.md 中的 YAML frontmatter"
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/definitions/event"
+    },
+    {
+      "$ref": "#/definitions/response"
+    },
+    {
+      "$ref": "#/definitions/rule"
+    }
+  ]
+}

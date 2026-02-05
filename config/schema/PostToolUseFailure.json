@@ -1,0 +1,220 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mindnext.dev/schema/PostToolUseFailure.json",
+  "title": "PostToolUseFailure Hook API",
+  "description": "工具執行失敗事件的完整 API 定義",
+  "examples": {
+    "event_example": {
+      "hook_event_name": "PostToolUseFailure",
+      "session_id": "abc-123",
+      "transcript_path": "/home/user/.claude/transcripts/xyz.jsonl",
+      "cwd": "/home/user/project",
+      "permission_mode": "default",
+      "tool_name": "Bash",
+      "tool_input": {
+        "command": "ls /nonexistent"
+      },
+      "error": {
+        "message": "ls: cannot access '/nonexistent': No such file or directory",
+        "type": "FileNotFoundError",
+        "stack": "Error: ls: cannot access '/nonexistent': No such file or directory\n    at execSync (/usr/lib/node_modules/bash/exec.js:123:45)"
+      },
+      "tool_use_id": "tool-456"
+    },
+    "response_context_example": {
+      "hookSpecificOutput": {
+        "hookEventName": "PostToolUseFailure",
+        "additionalContext": "此工具失敗，可能需要重試或使用替代方法"
+      }
+    },
+    "response_full_example": {
+      "hookSpecificOutput": {
+        "hookEventName": "PostToolUseFailure",
+        "additionalContext": "工具執行失敗：文件不存在。建議檢查路徑是否正確。"
+      },
+      "continue": true,
+      "suppressOutput": false,
+      "systemMessage": "執行失敗警告已記錄"
+    }
+  },
+  "definitions": {
+    "event": {
+      "title": "PostToolUseFailure Event Input",
+      "description": "從 Claude Code stdin 接收的 payload",
+      "x-usage": "工具執行失敗時觸發，用於錯誤處理和日誌",
+      "x-canBlock": false,
+      "type": "object",
+      "required": [
+        "cwd",
+        "tool_input",
+        "transcript_path",
+        "hook_event_name",
+        "error",
+        "session_id",
+        "tool_use_id",
+        "tool_name",
+        "permission_mode"
+      ],
+      "properties": {
+        "hook_event_name": {
+          "type": "string",
+          "const": "PostToolUseFailure"
+        },
+        "session_id": {
+          "type": "string"
+        },
+        "transcript_path": {
+          "type": "string"
+        },
+        "cwd": {
+          "type": "string"
+        },
+        "tool_name": {
+          "type": "string"
+        },
+        "tool_input": {
+          "type": "object"
+        },
+        "error": {
+          "type": "object",
+          "description": "工具執行的錯誤信息（物件格式，不是字符串）",
+          "properties": {
+            "message": {
+              "type": "string",
+              "description": "錯誤訊息內容"
+            },
+            "type": {
+              "type": "string",
+              "description": "錯誤類型（如 FileNotFoundError, PermissionError 等）"
+            },
+            "stack": {
+              "type": "string",
+              "description": "錯誤堆疊跟蹤信息"
+            }
+          },
+          "required": [
+            "message"
+          ],
+          "additionalProperties": true
+        },
+        "tool_use_id": {
+          "type": "string"
+        },
+        "permission_mode": {
+          "type": "string",
+          "enum": [
+            "default",
+            "plan",
+            "acceptEdits",
+            "dontAsk",
+            "bypassPermissions"
+          ],
+          "description": "權限模式"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "title": "PostToolUseFailure Response Output",
+      "type": "object",
+      "properties": {
+        "hookSpecificOutput": {
+          "type": "object",
+          "properties": {
+            "hookEventName": {
+              "type": "string",
+              "const": "PostToolUseFailure",
+              "description": "事件名稱 (必填)"
+            },
+            "additionalContext": {
+              "type": "string",
+              "description": "額外的上下文信息或建議"
+            }
+          },
+          "required": [
+            "hookEventName"
+          ],
+          "additionalProperties": false
+        },
+        "continue": {
+          "type": "boolean",
+          "description": "是否繼續執行（false 完全停止 Claude）"
+        },
+        "stopReason": {
+          "type": "string",
+          "description": "停止原因（給用戶）"
+        },
+        "suppressOutput": {
+          "type": "boolean",
+          "description": "是否隱藏輸出"
+        },
+        "systemMessage": {
+          "type": "string",
+          "description": "警告消息（給用戶）"
+        }
+      },
+      "description": "輸出到 Claude Code stdout 的 JSON。此事件不支持阻止或決策，僅支持注入上下文和通用控制字段"
+    },
+    "rule": {
+      "title": "PostToolUseFailure Rule Config",
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "enabled",
+        "event"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "event": {
+          "type": "string",
+          "const": "PostToolUseFailure"
+        },
+        "priority": {
+          "type": "integer",
+          "default": 50
+        },
+        "match": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object"
+            }
+          ]
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "context"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "description": "config/rules/*.md 中的 YAML frontmatter"
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/definitions/event"
+    },
+    {
+      "$ref": "#/definitions/response"
+    },
+    {
+      "$ref": "#/definitions/rule"
+    }
+  ]
+}

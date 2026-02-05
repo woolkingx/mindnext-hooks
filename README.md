@@ -3,7 +3,7 @@
 [![Tests](https://img.shields.io/badge/tests-125%2F125-brightgreen)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-93.5%25-brightgreen)](tests/test_report.json)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-blue)](../LICENSE)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 Production-ready hook system for [Claude Code CLI](https://github.com/anthropics/claude-code) with comprehensive logging, validation, and testing infrastructure.
 
@@ -26,8 +26,8 @@ v2 is a fully self-contained version. It does not depend on sibling versions (`v
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/mindnext-hooks.git
-cd mindnext-hooks/v2
+git clone https://github.com/woolkingx/mindnext-hooks.git
+cd mindnext-hooks
 
 # Install dependencies
 pip install -r requirements.txt
@@ -73,7 +73,7 @@ make validate-rules
 ## Architecture
 
 ```
-v2/
+.
 ├── main.py              # Entry point: stdin → router → output → stdout
 ├── router.py            # Event routing with concurrent rule processing
 ├── output.py            # Response merging and JSON output
